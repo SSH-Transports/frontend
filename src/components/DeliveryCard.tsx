@@ -1,14 +1,14 @@
-import React from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
+import React from 'react'
+import { Card, CardContent, Typography } from '@mui/material'
 
 interface DeliveryCardProps {
   delivery: {
-    id: string;
-    status: string;
-    cost: number;
-    motoboy: string;
-    distance: number;
-  };
+    id: string
+    status: string
+    cost: number
+    motoboy: string
+    distance: number
+  }
 }
 
 const DeliveryCard: React.FC<DeliveryCardProps> = ({ delivery }) => {
@@ -22,7 +22,7 @@ const DeliveryCard: React.FC<DeliveryCardProps> = ({ delivery }) => {
         <Typography>Custo: R$ {delivery.cost}</Typography>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default DeliveryCard;
+export default DeliveryCard

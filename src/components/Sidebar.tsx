@@ -1,6 +1,6 @@
-import React from 'react';
-import { List, ListItem, ListItemText } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import { List, ListItem, ListItemText } from '@mui/material'
+import { Link } from 'react-router-dom'
 
 const Sidebar: React.FC = () => {
   return (
@@ -17,7 +17,7 @@ const Sidebar: React.FC = () => {
         </ListItem>
       </List>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

@@ -1,15 +1,15 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Dashboard from './pages/Dashboard';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DeliveryForm from './pages/DeliveryForm';
-import MotoboyPage from './pages/MotoboyPage';
-import AdminPage from './pages/AdminPage';
-import theme from './theme';
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from '@mui/material'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import Dashboard from './pages/Dashboard'
+import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
+import DeliveryForm from './pages/DeliveryForm'
+import MotoboyPage from './pages/MotoboyPage'
+import AdminPage from './pages/AdminPage'
+import theme from './theme'
 
 const App: React.FC = () => {
   return (
@@ -28,7 +28,7 @@ const App: React.FC = () => {
         <Footer />
       </Router>
     </ThemeProvider>
-  );
-};
+  )
+}
 
-export default App;
+export default App

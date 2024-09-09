@@ -1,5 +1,5 @@
-import React from 'react';
-import { Typography } from '@mui/material';
+import React from 'react'
+import { Typography } from '@mui/material'
 
 const Footer: React.FC = () => {
   return (
@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         © 2024 LAP Informática. Todos os direitos reservados.
       </Typography>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

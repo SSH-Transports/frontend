@@ -1,12 +1,21 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { TextField, Button, Container, Typography, Paper, Box, InputAdornment, IconButton } from '@mui/material';
-import { styled } from '@mui/system';
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Paper,
+  Box,
+  InputAdornment,
+  IconButton,
+} from '@mui/material'
+import { styled } from '@mui/system'
+import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
+import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 const ContainerStyled = styled(Container)({
   display: 'flex',
@@ -14,7 +23,7 @@ const ContainerStyled = styled(Container)({
   justifyContent: 'center',
   minHeight: '100vh',
   backgroundColor: '#ffffff',
-});
+})
 
 const PaperStyled = styled(Paper)({
   padding: '2rem',
@@ -23,46 +32,52 @@ const PaperStyled = styled(Paper)({
   backgroundColor: 'white',
   width: '100%',
   maxWidth: '400px',
-});
+})
 
 const TitleStyled = styled(Typography)({
   marginBottom: '1rem',
   fontWeight: 'bold',
   textAlign: 'center',
-});
+})
 
 const ButtonStyled = styled(Button)({
   marginTop: '1rem',
   width: '100%',
-});
+})
 
 const LinkStyled = styled(Link)({
   textAlign: 'center',
   display: 'block',
   marginTop: '1rem',
-});
+})
 
 const schema = z.object({
   email: z.string().email('O email deve ser válido.'),
   password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
-});
+})
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof schema>
 
 const LoginPage: React.FC = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
-  });
+  })
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault();
+  const handleClickShowPassword = () => setShowPassword(!showPassword)
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => event.preventDefault()
 
   const onSubmit = (data: FormData) => {
-    console.log(data);
+    console.log(data)
     // Inserir a lógica de login aqui
-  };
+  }
 
   return (
     <ContainerStyled>
@@ -117,11 +132,13 @@ const LoginPage: React.FC = () => {
           <ButtonStyled type="submit" variant="contained" color="primary">
             Entrar
           </ButtonStyled>
-          <LinkStyled to="/signup">Não tem uma conta? Crie uma agora</LinkStyled>
+          <LinkStyled to="/signup">
+            Não tem uma conta? Crie uma agora
+          </LinkStyled>
         </form>
       </PaperStyled>
     </ContainerStyled>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage
