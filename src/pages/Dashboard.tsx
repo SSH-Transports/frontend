@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Container, Typography } from '@mui/material'
 import DeliveryList from '../components/DeliveryList'
 import axios from 'axios'
-
+import { deliveries_mock } from '../data'
 const Dashboard: React.FC = () => {
   const [deliveries, setDeliveries] = useState([])
 
@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
   return (
     <Container>
       <Typography variant="h4">Dashboard</Typography>
-      <DeliveryList deliveries={deliveries} />
+      <DeliveryList deliveries={deliveries_mock} />
     </Container>
   )
 }
