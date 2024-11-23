@@ -155,28 +155,17 @@ const Dashboard = () => {
           <Typography variant="h6" gutterBottom>
             Filtros
           </Typography>
-          <RadioGroup
+            <Select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
-          >
-            <FormControlLabel value="Todos" control={<Radio />} label="Todos" />
-            <FormControlLabel
-              value="Entregue"
-              control={<Radio />}
-              label="Entregues"
-            />
-            <FormControlLabel
-              value="Pendente"
-              control={<Radio />}
-              label="Pendentes"
-            />
-            <FormControlLabel
-              value="Recusada"
-              control={<Radio />}
-              label="Recusadas"
-            />
-          </RadioGroup>
+            displayEmpty
+            fullWidth
+            >
+            <MenuItem value="Todos">Todos</MenuItem>
+            <MenuItem value="Entregue">Entregues</MenuItem>
+            <MenuItem value="Pendente">Pendentes</MenuItem>
+            <MenuItem value="Recusada">Recusadas</MenuItem>
+            </Select>
 
           <Select
             value={dateFilter}
