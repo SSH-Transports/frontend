@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import { deliveries_mock } from '../data/deliveries'
 import useMediaQuery from '@mui/material/useMediaQuery';
+import DeliveryCard from '../components/DeliveryCard'
 
 const getDateRange = (filter: string) => {
   const now = new Date()
@@ -110,26 +111,27 @@ const Dashboard = () => {
   const mobile = useMediaQuery('(max-width:767px)');
   
   return (
-    <Box
-      display="flex"
-      justifyContent="space-around"
-      alignItems="flex-start"
-      flexWrap="wrap"
-      flexDirection={mobile ? 'column-reverse' : 'row'}
-      bgcolor="#f9f9f9"
-      padding="20px"
-      height="100vh"
-    >
+    <div style={{
+      padding: '20px',
+      backgroundColor: '#f9f9f9',
+    }}>
+      <Box
+        display="flex"
+        justifyContent="space-around"
+        alignItems="flex-start"
+        flexWrap="wrap"
+        flexDirection={mobile ? 'column-reverse' : 'row'}
+        >
       <Paper elevation={3} sx={{ width: mobile ? 'calc(100% - 16px)' : '45%', p: mobile ? 1 : 3 }}>
         <Typography variant="h6" gutterBottom>
           Nossas Entregas
         </Typography>
         {filteredDeliveries.length > 0 ? (
           <Chart
-            options={chartData.options}
-            series={chartData.series}
-            type="pie"
-            height={350}
+          options={chartData.options}
+          series={chartData.series}
+          type="pie"
+          height={350}
           />
         ) : (
           <Typography color="textSecondary">
@@ -147,23 +149,23 @@ const Dashboard = () => {
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-        >
+          >
           <FormControlLabel value="Todos" control={<Radio />} label="Todos" />
           <FormControlLabel
             value="Entregue"
             control={<Radio />}
             label="Entregues"
-          />
+            />
           <FormControlLabel
             value="Pendente"
             control={<Radio />}
             label="Pendentes"
-          />
+            />
           <FormControlLabel
             value="Recusada"
             control={<Radio />}
             label="Recusadas"
-          />
+            />
         </RadioGroup>
 
         <Select
@@ -172,7 +174,7 @@ const Dashboard = () => {
           displayEmpty
           fullWidth
           sx={{ mt: 3 }}
-        >
+          >
           <MenuItem value="Todas">Todas as Datas</MenuItem>
           <MenuItem value="Today">Hoje</MenuItem>
           <MenuItem value="ThisWeek">Esta Semana</MenuItem>
@@ -181,6 +183,17 @@ const Dashboard = () => {
         </Select>
       </Paper>
     </Box>
+    <Box marginY={3}>
+      {Object.entries(groupedDeliveries).map(([key, deliveries]) => (
+        <Box key={key} marginY={3}>
+          <Typography variant="h6">{key}</Typography>
+          {deliveries.map(delivery => (
+            <DeliveryCard key={delivery.id} delivery={delivery} />
+          ))}
+        </Box>
+      ))}
+    </Box>
+  </div>
   )
 }
 
