@@ -3,12 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import Dashboard from './pages/Dashboard'
-import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import DeliveryForm from './pages/DeliveryForm'
-import MotoboyPage from './pages/MotoboyPage'
-import AdminPage from './pages/AdminPage'
+import { MotoboyPageOrder, Dashboard, DeliveryForm, LoginPage, MotoboyPage, SignupPage, AdminPage } from './pages'
+
 import theme from './theme'
 
 const App: React.FC = () => {
@@ -23,6 +19,7 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/delivery-form" element={<DeliveryForm />} />
           <Route path="/motoboy" element={<MotoboyPage />} />
+          <Route path="/motoboy-order" element={<MotoboyPageOrder />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
         <Footer />

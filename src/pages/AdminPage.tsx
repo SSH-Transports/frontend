@@ -18,6 +18,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/HourglassEmpty';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import CancelIcon from '@mui/icons-material/Cancel';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const fadeInSlideDown = keyframes`
   0% {
@@ -36,6 +37,8 @@ const AdminPage: React.FC = () => {
   const [assignedDeliveries, setAssignedDeliveries] = useState<{ [key: string]: string }>({});
   const [deliveries, setDeliveries] = useState(deliveries_mock);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  
+  const mobile = useMediaQuery('(max-width:767px)');
 
   const handleAcceptDelivery = (deliveryId: string) => {
     setDeliveries((prev) =>
@@ -105,15 +108,17 @@ const AdminPage: React.FC = () => {
         bgcolor="primary.main"
         color="white"
         marginTop="2rem"
+        flexDirection={mobile ? 'column' : 'row'}
       >
         <Typography
           variant="h3"
+          fontSize={mobile ? '1.2rem' : '3rem'}
           fontFamily="Roboto, sans-serif"
           fontWeight="bold"
           gutterBottom
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
-          <LocalShippingIcon fontSize="large" />
+        <LocalShippingIcon fontSize={mobile ? 'large' : 'inherit'} />
           Administração de Entregas
         </Typography>
         <Typography variant="body1" fontStyle="italic">
