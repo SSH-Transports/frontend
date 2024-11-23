@@ -16,6 +16,7 @@ import { styled } from '@mui/system'
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import postLogin from '../services/postLogin'
 
 const ContainerStyled = styled(Container)({
   display: 'flex',
@@ -74,9 +75,13 @@ const LoginPage: React.FC = () => {
     event: React.MouseEvent<HTMLButtonElement>,
   ) => event.preventDefault()
 
-  const onSubmit = (data: FormData) => {
-    console.log(data)
-    // Inserir a lógica de login aqui
+  const onSubmit = async (data: FormData) => {
+    const login = await postLogin(data)
+    login.access_token
+      ? (
+        localStorage.setItem('token', login.access_token)
+      )
+      : alert('Não foi possível criar esse usuário')
   }
 
   return (

@@ -1,8 +1,14 @@
 import api from './api'
-import { User } from '../types/User'
 
-export default function postLogin(body: User): Promise<User> {
-  return api.post(`login`, body).then(
+interface Login {
+  email: string
+  password: string
+}
+
+export default function postLogin(
+  body: Login,
+): Promise<{ access_token: string }> {
+  return api.post(`auth/login`, body).then(
     response => {
       return response.data
     },
