@@ -77,11 +77,11 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     const login = await postLogin(data)
-    login.access_token
-      ? (
-        localStorage.setItem('token', login.access_token)
-      )
-      : alert('Não foi possível criar esse usuário')
+    if (login.access_token) {
+      localStorage.setItem('token', login.access_token)
+    } else {
+      alert('Não foi possível criar esse usuário')
+    }
   }
 
   return (
