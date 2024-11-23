@@ -12,6 +12,7 @@ import {
   Select,
 } from '@mui/material'
 import { deliveries_mock } from '../data/deliveries'
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const getDateRange = (filter: string) => {
   const now = new Date()
@@ -106,16 +107,20 @@ const Dashboard = () => {
       chart: { type: 'pie' as const, toolbar: { show: false } },
     },
   }
-
+  const mobile = useMediaQuery('(max-width:767px)');
+  
   return (
     <Box
       display="flex"
       justifyContent="space-around"
       alignItems="flex-start"
       flexWrap="wrap"
-      sx={{ height: '100vh', bgcolor: '#f9f9f9', p: 4 }}
+      flexDirection={mobile ? 'column-reverse' : 'row'}
+      bgcolor="#f9f9f9"
+      padding="20px"
+      height="100vh"
     >
-      <Paper elevation={3} sx={{ width: '45%', p: 3 }}>
+      <Paper elevation={3} sx={{ width: mobile ? 'calc(100% - 16px)' : '45%', p: mobile ? 1 : 3 }}>
         <Typography variant="h6" gutterBottom>
           Nossas Entregas
         </Typography>
@@ -133,7 +138,8 @@ const Dashboard = () => {
         )}
       </Paper>
 
-      <Paper elevation={3} sx={{ width: '25%', p: 3, mt: { xs: 3, md: 0 } }}>
+      <Paper elevation={3} 
+        sx={{ width: mobile ? 'calc(100% - 16px)' : '25%', p: mobile ? 1 : 3, mt: { xs: 3, md: 0 } }}>
         <Typography variant="h6" gutterBottom>
           Filtros
         </Typography>

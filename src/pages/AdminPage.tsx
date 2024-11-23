@@ -38,7 +38,7 @@ const AdminPage: React.FC = () => {
   const [deliveries, setDeliveries] = useState(deliveries_mock);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
-  const mobile = useMediaQuery('(max-width:768px)');
+  const mobile = useMediaQuery('(max-width:767px)');
 
   const handleAcceptDelivery = (deliveryId: string) => {
     setDeliveries((prev) =>
