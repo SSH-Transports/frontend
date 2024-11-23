@@ -9,6 +9,8 @@ import SignupPage from './pages/SignupPage'
 import DeliveryForm from './pages/DeliveryForm'
 import MotoboyPage from './pages/MotoboyPage'
 import AdminPage from './pages/AdminPage'
+import MotoboyPageOrder from './pages/MotoboyPageOrder'
+
 import theme from './theme'
 
 const App: React.FC = () => {
@@ -23,6 +25,7 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/delivery-form" element={<DeliveryForm />} />
           <Route path="/motoboy" element={<MotoboyPage />} />
+          <Route path="/motoboy-order" element={<MotoboyPageOrder />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
         <Footer />
