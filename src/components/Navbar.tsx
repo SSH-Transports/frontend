@@ -16,7 +16,7 @@ const Navbar: React.FC = () => {
           Login
         </Button>
         <Button color="inherit" component={Link} to="/signup">
-          Signup
+          Cadastro
         </Button>
       </Toolbar>
     </AppBar>

@@ -20,13 +20,15 @@ import {
   Email,
   Lock,
   Person,
-  AccountBox,
 } from '@mui/icons-material'
 import { Link, useNavigate } from 'react-router-dom'
+import postSignUp from '../services/postSignUp'
+import { UserRoles } from '../types/User'
+import { omit } from 'lodash'
 
 const schema = z
   .object({
-    username: z
+    name: z
       .string()
       .min(3, 'O nome de usuário deve ter pelo menos 3 caracteres.'),
     email: z.string().email('O email deve ser válido.'),
@@ -34,10 +36,7 @@ const schema = z
     confirmPassword: z
       .string()
       .min(6, 'A confirmação de senha deve ter pelo menos 6 caracteres.'),
-    cpf: z
-      .string()
-      .length(11, 'O CPF deve ter 11 dígitos.')
-      .regex(/^\d+$/, 'O CPF deve conter apenas números.'),
+    role: z.nativeEnum(UserRoles).default(UserRoles.CUSTOMER),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'As senhas não coincidem.',
@@ -102,10 +101,10 @@ const SignupPage: React.FC = () => {
   const navigate = useNavigate()
 
   const onSubmit = async (data: FormData) => {
-    console.log('Dados do formulário:', data)
-    // Simula a criação de conta com sucesso
-    alert('Cadastro realizado com sucesso!')
-    navigate('/login')
+    const newUser = await postSignUp(omit(data, ['confirmPassword']))
+    newUser.id
+      ? navigate('/login')
+      : alert('Não foi possível criar esse usuário')
   }
 
   return (
@@ -118,9 +117,9 @@ const SignupPage: React.FC = () => {
               <TextField
                 label="Nome de Usuário"
                 fullWidth
-                {...register('username')}
-                error={!!errors.username}
-                helperText={errors.username?.message}
+                {...register('name')}
+                error={!!errors.name}
+                helperText={errors.name?.message}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -202,22 +201,6 @@ const SignupPage: React.FC = () => {
                           <Visibility />
                         )}
                       </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Box>
-            <Box mb={2}>
-              <TextField
-                label="CPF"
-                fullWidth
-                {...register('cpf')}
-                error={!!errors.cpf}
-                helperText={errors.cpf?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <AccountBox />
                     </InputAdornment>
                   ),
                 }}
