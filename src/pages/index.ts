@@ -1,0 +1,8 @@
+export { default as Home } from './AdminPage'
+export { default as Dashboard } from './Dashboard'
+export { default as DeliveryForm } from './DeliveryForm'
+export { default as LoginPage } from './LoginPage'
+export { default as MotoboyPage } from './MotoboyPage'
+export { default as MotoboyPageOrder } from './MotoboyPageOrder'
+export { default as SignupPage } from './SignupPage'
+export { default as AdminPage } from './AdminPage'
