@@ -12,7 +12,7 @@ import {
   Select,
 } from '@mui/material'
 import { deliveries_mock } from '../data/deliveries'
-import useMediaQuery from '@mui/material/useMediaQuery';
+import useMediaQuery from '@mui/material/useMediaQuery'
 import DeliveryCard from '../components/DeliveryCard'
 
 const getDateRange = (filter: string) => {
@@ -73,21 +73,6 @@ const Dashboard = () => {
     })
   }
 
-  const groupedDeliveries = filteredDeliveries.reduce((acc, delivery) => {
-    const deliveryDate = dayjs(delivery.date)
-    const key = dateFilter === 'Today' ? deliveryDate.format('YYYY-MM-DD') : deliveryDate.format('YYYY-MM')
-
-    if (!acc[key]) {
-      acc[key] = []
-    }
-
-    acc[key].push(delivery)
-    return acc
-  }, {} as { [key: string]: typeof filteredDeliveries })
-
-
-  console.log(groupedDeliveries)
-
   const chartData = {
     series: filteredDeliveries.map(delivery => delivery.cost),
     options: {
@@ -108,92 +93,144 @@ const Dashboard = () => {
       chart: { type: 'pie' as const, toolbar: { show: false } },
     },
   }
-  const mobile = useMediaQuery('(max-width:767px)');
-  
+
+  const mobile = useMediaQuery('(max-width:767px)')
+
+  filteredDeliveries.sort((a, b) => {
+    const dateA = dayjs(a.date)
+    const dateB = dayjs(b.date)
+
+    if (dateA.isBefore(dateB)) return -1
+    if (dateA.isAfter(dateB)) return 1
+
+    return Number(a.id) - Number(b.id)
+  })
+
   return (
-    <div style={{
-      padding: '20px',
-      backgroundColor: '#f9f9f9',
-    }}>
+    <div
+      style={{
+        padding: '20px',
+        backgroundColor: '#f9f9f9',
+      }}
+    >
       <Box
         display="flex"
         justifyContent="space-around"
         alignItems="flex-start"
         flexWrap="wrap"
         flexDirection={mobile ? 'column-reverse' : 'row'}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            width: mobile ? 'calc(100% - 16px)' : '45%',
+            p: mobile ? 1 : 3,
+          }}
         >
-      <Paper elevation={3} sx={{ width: mobile ? 'calc(100% - 16px)' : '45%', p: mobile ? 1 : 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Nossas Entregas
-        </Typography>
-        {filteredDeliveries.length > 0 ? (
-          <Chart
-          options={chartData.options}
-          series={chartData.series}
-          type="pie"
-          height={350}
-          />
-        ) : (
-          <Typography color="textSecondary">
-            Nenhuma entrega encontrada.
+          <Typography variant="h6" gutterBottom>
+            Nossas Entregas
           </Typography>
-        )}
-      </Paper>
+          {filteredDeliveries.length > 0 ? (
+            <Chart
+              options={chartData.options}
+              series={chartData.series}
+              type="pie"
+              height={350}
+            />
+          ) : (
+            <Typography color="textSecondary">
+              Nenhuma entrega encontrada.
+            </Typography>
+          )}
+        </Paper>
 
-      <Paper elevation={3} 
-        sx={{ width: mobile ? 'calc(100% - 16px)' : '25%', p: mobile ? 1 : 3, mt: { xs: 3, md: 0 } }}>
-        <Typography variant="h6" gutterBottom>
-          Filtros
-        </Typography>
-        <RadioGroup
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        <Paper
+          elevation={3}
+          sx={{
+            width: mobile ? 'calc(100% - 16px)' : '25%',
+            p: mobile ? 1 : 3,
+            mt: { xs: 3, md: 0 },
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Filtros
+          </Typography>
+          <RadioGroup
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
           >
-          <FormControlLabel value="Todos" control={<Radio />} label="Todos" />
-          <FormControlLabel
-            value="Entregue"
-            control={<Radio />}
-            label="Entregues"
+            <FormControlLabel value="Todos" control={<Radio />} label="Todos" />
+            <FormControlLabel
+              value="Entregue"
+              control={<Radio />}
+              label="Entregues"
             />
-          <FormControlLabel
-            value="Pendente"
-            control={<Radio />}
-            label="Pendentes"
+            <FormControlLabel
+              value="Pendente"
+              control={<Radio />}
+              label="Pendentes"
             />
-          <FormControlLabel
-            value="Recusada"
-            control={<Radio />}
-            label="Recusadas"
+            <FormControlLabel
+              value="Recusada"
+              control={<Radio />}
+              label="Recusadas"
             />
-        </RadioGroup>
+          </RadioGroup>
 
-        <Select
-          value={dateFilter}
-          onChange={e => setDateFilter(e.target.value)}
-          displayEmpty
-          fullWidth
-          sx={{ mt: 3 }}
+          <Select
+            value={dateFilter}
+            onChange={e => setDateFilter(e.target.value)}
+            displayEmpty
+            fullWidth
+            sx={{ mt: 3 }}
           >
-          <MenuItem value="Todas">Todas as Datas</MenuItem>
-          <MenuItem value="Today">Hoje</MenuItem>
-          <MenuItem value="ThisWeek">Esta Semana</MenuItem>
-          <MenuItem value="ThisMonth">Este Mês</MenuItem>
-          <MenuItem value="ThisYear">Este Ano</MenuItem>
-        </Select>
-      </Paper>
-    </Box>
-    <Box marginY={3}>
-      {Object.entries(groupedDeliveries).map(([key, deliveries]) => (
-        <Box key={key} marginY={3}>
-          <Typography variant="h6">{key}</Typography>
-          {deliveries.map(delivery => (
-            <DeliveryCard key={delivery.id} delivery={delivery} />
+            <MenuItem value="Todas">Todas as Datas</MenuItem>
+            <MenuItem value="Today">Hoje</MenuItem>
+            <MenuItem value="ThisWeek">Esta Semana</MenuItem>
+            <MenuItem value="ThisMonth">Este Mês</MenuItem>
+            <MenuItem value="ThisYear">Este Ano</MenuItem>
+          </Select>
+        </Paper>
+      </Box>
+
+      <Box
+        marginY={3}
+        display="grid"
+        gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))"
+        gap={4}
+      >
+        {filteredDeliveries
+          .sort((a, b) => Number(a.id) - Number(b.id))
+          .map(delivery => (
+            <Box
+              key={delivery.id}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '8px',
+                width: '100%',
+              }}
+            >
+              <Box
+                sx={{
+                  width: '70%',
+                  height: '200px',
+                  borderRadius: '8px',
+                  border: '10px solid #06486b',
+                  boxShadow: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <DeliveryCard delivery={delivery} />
+              </Box>
+            </Box>
           ))}
-        </Box>
-      ))}
-    </Box>
-  </div>
+      </Box>
+    </div>
   )
 }
 
