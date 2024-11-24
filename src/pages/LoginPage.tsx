@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/system'
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import postLogin from '../services/postLogin'
 
@@ -74,10 +74,13 @@ const LoginPage: React.FC = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>,
   ) => event.preventDefault()
+  
+  const navigate = useNavigate()
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormData) => {    
     const login = await postLogin(data)
     if (login.access_token) {
+      navigate("/dashboard")
       localStorage.setItem('token', login.access_token)
     } else {
       alert('Não foi possível criar esse usuário')

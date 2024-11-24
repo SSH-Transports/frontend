@@ -9,13 +9,11 @@ import React, {
   useMemo,
 } from 'react'
 
-import { jwtDecode } from "jwt-decode";
-import getUser from '../services/getUser';
-import { User } from '../types/User';
+import { jwtDecode } from 'jwt-decode'
+import getUser from '../services/getUser'
+import { User } from '../types/User'
 
 interface UserContextData {
-  loggedStatus?: boolean
-  setLoggedStatus: React.Dispatch<SetStateAction<boolean>>
   user?: User
   setUser: React.Dispatch<SetStateAction<User | undefined>>
 }
@@ -35,53 +33,56 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
 }) => {
   const [token, setToken] = useState<string>()
   const tokenStorage = localStorage.getItem('token')
-  const status = localStorage.getItem('loggedStatusVariable')
   const [user, setUser] = useState<User>()
-  const [loggedStatus, setLoggedStatus] = useState<boolean>(!!status)
-
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if(token){
-        const decoded = jwtDecode(tokenStorage as string);
-        if (decoded && decoded.exp && decoded.exp < Date.now() / 1000) {
-          setUser(undefined)
-          setToken('')
-          setLoggedStatus(false)
-          localStorage.removeItem('token')
-          localStorage.removeItem('loggedStatusVariable')
-        } else {
-          if (typeof decoded.sub === 'string') {
-            await getUser(decoded.sub)
-              .then((response) => {
-                setUser(response)
-              })
-              .catch((error) => {
-                console.error(error)
-              })
-          }
-        }
-      }
-    }
-    fetchUser();
-  }, [token]);
-
+  const userStorage = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null
 
   useEffect(() => {
-    if (tokenStorage && !token) {
+    if(tokenStorage && !token){
       setToken(tokenStorage)
     }
-  }, [tokenStorage, token])
+  }, [tokenStorage])
+
+  const fetchUser = async () => {
+    console.log(token)
+    if (tokenStorage) {
+      const decoded = jwtDecode(tokenStorage as string)
+      /* if (decoded && decoded.exp && decoded.exp < Date.now() / 1000) {
+        localStorage.removeItem('token')
+      } */ /* else { */
+        if (typeof decoded.sub === 'string') {
+          await getUser(decoded.sub)
+            .then(response => {
+              console.log(response)
+              setUser(response)
+            })
+            .catch(error => {
+              console.error(error)
+            })
+        /* } */
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchUser()
+  }, [token])
+
+  useEffect(() => {
+    if (userStorage && !user) {
+      setUser(userStorage)
+    }
+  }, [userStorage, user])
+
+  console.log(token)
+  console.log(user)
 
   const values = useMemo(() => {
     return {
-      token,
-      loggedStatus,
-      setLoggedStatus,
+      tokenStorage,
       user,
-      setUser
+      setUser,
     }
-  }, [loggedStatus, token, user])
+  }, [tokenStorage, user, userStorage])
 
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>
 }

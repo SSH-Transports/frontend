@@ -21,6 +21,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import HistoryIcon from '@mui/icons-material/History'
+import LogoutIcon from '@mui/icons-material/Logout'
 import { useUserContext } from '../context/userContext'
 import { UserRoles } from '../types/User'
 
@@ -77,14 +78,22 @@ const Navbar: React.FC = () => {
         <List>
           {!user ? (
             <>
-              <ListItem component={Link} to="/login" onClick={toggleDrawer(false)}>
+              <ListItem
+                component={Link}
+                to="/login"
+                onClick={toggleDrawer(false)}
+              >
                 <ListItemIcon>
                   <LoginIcon sx={{ color: '#ecf0f1' }} />
                 </ListItemIcon>
                 <ListItemText primary="Login" sx={{ color: '#ecf0f1' }} />
               </ListItem>
 
-              <ListItem component={Link} to="/signup" onClick={toggleDrawer(false)}>
+              <ListItem
+                component={Link}
+                to="/signup"
+                onClick={toggleDrawer(false)}
+              >
                 <ListItemIcon>
                   <PersonAddIcon sx={{ color: '#ecf0f1' }} />
                 </ListItemIcon>
@@ -106,7 +115,11 @@ const Navbar: React.FC = () => {
                 </ListItem>
               )}
               {user.role === UserRoles.ADMIN && (
-                <ListItem component={Link} to="/admin" onClick={toggleDrawer(false)}>
+                <ListItem
+                  component={Link}
+                  to="/admin"
+                  onClick={toggleDrawer(false)}
+                >
                   <ListItemIcon>
                     <AdminPanelSettingsIcon sx={{ color: '#ecf0f1' }} />
                   </ListItemIcon>
@@ -155,6 +168,20 @@ const Navbar: React.FC = () => {
                   />
                 </ListItem>
               )}
+              <ListItem
+                component={Link}
+                to="/login"
+                onClick={() => {
+                  toggleDrawer(false)
+                  localStorage.setItem(`user`, ``)
+                  localStorage.setItem(`token`, ``)
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon sx={{ color: '#ecf0f1' }} />
+                </ListItemIcon>
+                <ListItemText primary="Sair" sx={{ color: '#ecf0f1' }} />
+              </ListItem>
             </>
           )}
         </List>
