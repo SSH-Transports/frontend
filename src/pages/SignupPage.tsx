@@ -102,9 +102,11 @@ const SignupPage: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     const newUser = await postSignUp(omit(data, ['confirmPassword']))
-    newUser.id
-      ? navigate('/login')
-      : alert('Não foi possível criar esse usuário')
+    if (newUser.id) {
+      navigate('/login');
+    } else {
+      alert('Não foi possível criar esse usuário');
+    }
   }
 
   return (

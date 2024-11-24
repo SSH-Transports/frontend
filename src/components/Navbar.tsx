@@ -21,6 +21,8 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import HistoryIcon from '@mui/icons-material/History'
+import { useUserContext } from '../context/userContext'
+import { UserRoles } from '../types/User'
 
 const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -36,6 +38,8 @@ const Navbar: React.FC = () => {
       }
       setDrawerOpen(open)
     }
+
+  const { user } = useUserContext()
 
   return (
     <>
@@ -54,7 +58,6 @@ const Navbar: React.FC = () => {
           </IconButton>
         </Toolbar>
       </AppBar>
-
       <Drawer
         anchor="left"
         open={drawerOpen}
@@ -72,76 +75,88 @@ const Navbar: React.FC = () => {
         </Box>
         <Divider sx={{ backgroundColor: '#7f8c8d' }} />
         <List>
-          <ListItem component={Link} to="/login" onClick={toggleDrawer(false)}>
-            <ListItemIcon>
-              <LoginIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText primary="Login" sx={{ color: '#ecf0f1' }} />
-          </ListItem>
+          {!user ? (
+            <>
+              <ListItem component={Link} to="/login" onClick={toggleDrawer(false)}>
+                <ListItemIcon>
+                  <LoginIcon sx={{ color: '#ecf0f1' }} />
+                </ListItemIcon>
+                <ListItemText primary="Login" sx={{ color: '#ecf0f1' }} />
+              </ListItem>
 
-          <ListItem component={Link} to="/signup" onClick={toggleDrawer(false)}>
-            <ListItemIcon>
-              <PersonAddIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText primary="Cadastro" sx={{ color: '#ecf0f1' }} />
-          </ListItem>
-
-          <ListItem
-            component={Link}
-            to="/dashboard"
-            onClick={toggleDrawer(false)}
-          >
-            <ListItemIcon>
-              <DashboardIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" sx={{ color: '#ecf0f1' }} />
-          </ListItem>
-
-          <ListItem component={Link} to="/admin" onClick={toggleDrawer(false)}>
-            <ListItemIcon>
-              <AdminPanelSettingsIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText primary="Admin" sx={{ color: '#ecf0f1' }} />
-          </ListItem>
-
-          <ListItem
-            component={Link}
-            to="/delivery-form"
-            onClick={toggleDrawer(false)}
-          >
-            <ListItemIcon>
-              <AddShoppingCartIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Solicitar pedido"
-              sx={{ color: '#ecf0f1' }}
-            />
-          </ListItem>
-
-          <ListItem
-            component={Link}
-            to="/order/:id"
-            onClick={toggleDrawer(false)}
-          >
-            <ListItemIcon>
-              <AssignmentIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText primary="Pedido" sx={{ color: '#ecf0f1' }} />
-          </ListItem>
-
-          <ListItem
-            component={Link}
-            to="/motoboy-history"
-            onClick={toggleDrawer(false)}
-          >
-            <ListItemIcon>
-              <HistoryIcon sx={{ color: '#ecf0f1' }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Histórico de pedidos"
-              sx={{ color: '#ecf0f1' }}
-            />
-          </ListItem>
+              <ListItem component={Link} to="/signup" onClick={toggleDrawer(false)}>
+                <ListItemIcon>
+                  <PersonAddIcon sx={{ color: '#ecf0f1' }} />
+                </ListItemIcon>
+                <ListItemText primary="Cadastro" sx={{ color: '#ecf0f1' }} />
+              </ListItem>
+            </>
+          ) : (
+            <>
+              {user.role === UserRoles.ADMIN && (
+                <ListItem
+                  component={Link}
+                  to="/dashboard"
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemIcon>
+                    <DashboardIcon sx={{ color: '#ecf0f1' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard" sx={{ color: '#ecf0f1' }} />
+                </ListItem>
+              )}
+              {user.role === UserRoles.ADMIN && (
+                <ListItem component={Link} to="/admin" onClick={toggleDrawer(false)}>
+                  <ListItemIcon>
+                    <AdminPanelSettingsIcon sx={{ color: '#ecf0f1' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Admin" sx={{ color: '#ecf0f1' }} />
+                </ListItem>
+              )}
+              {[UserRoles.ADMIN, UserRoles.CUSTOMER].includes(user.role) && (
+                <ListItem
+                  component={Link}
+                  to="/delivery-form"
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemIcon>
+                    <AddShoppingCartIcon sx={{ color: '#ecf0f1' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Solicitar pedido"
+                    sx={{ color: '#ecf0f1' }}
+                  />
+                </ListItem>
+              )}
+              {[UserRoles.ADMIN, UserRoles.COURIER].includes(user.role) && (
+                <ListItem
+                  component={Link}
+                  to="/order/:id"
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemIcon>
+                    <AssignmentIcon sx={{ color: '#ecf0f1' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Pedido" sx={{ color: '#ecf0f1' }} />
+                </ListItem>
+              )}
+              {[UserRoles.ADMIN, UserRoles.COURIER].includes(user.role) && (
+                <ListItem
+                  component={Link}
+                  to="/motoboy-history"
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemIcon>
+                    <HistoryIcon sx={{ color: '#ecf0f1' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Histórico de pedidos"
+                    sx={{ color: '#ecf0f1' }}
+                  />
+                </ListItem>
+              )}
+            </>
+          )}
         </List>
       </Drawer>
     </>
