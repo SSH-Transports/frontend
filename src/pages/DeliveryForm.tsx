@@ -11,6 +11,7 @@ import AddressPicker from '../components/AddressPicker'
 import postOrder from '../services/postOrder'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
+import { OrderStatus } from '../types/Order'
 
 type Destination = {
   lat: number
@@ -75,21 +76,30 @@ const DeliveryForm: React.FC = () => {
   }
 
   const handleFinish = async () => {
-    const newOrder = await postOrder({
-      weight,
-      distance,
-      cost,
-      time,
-      latitude: destination?.lat as number,
-      longitude: destination?.lng as number,
-    })
-
-    console.log('Order created: ', newOrder)
-    setTimeout(() => {
-      navigate('/dashboard')
-      toast.success('Pedido realizado com sucesso!')
-    }, 2000)
-  }
+    try {
+      console.log('Iniciando criação de pedido...');
+      const newOrder = await postOrder({
+        id: '1',
+        weight,
+        distance,
+        cost,
+        time,
+        latitude: destination?.lat as number,
+        longitude: destination?.lng as number,
+        customerId: '1',
+        status: OrderStatus.WAITING_RESPONSE,
+      });
+      console.log('Order created: ', newOrder);
+  
+      navigate('/dashboard');
+      toast.success('Pedido realizado com sucesso!');
+    } catch (error: unknown) {
+      console.error('Error creating order: ', error);
+      const errorMessage = (error instanceof Error ? error.message : 'Erro ao realizar o pedido. Tente novamente.');
+      toast.error(errorMessage);
+    }
+  };
+  
 
   return (
     <Container style={styles.container}>

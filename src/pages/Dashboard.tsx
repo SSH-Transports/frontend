@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Chart from 'react-apexcharts'
 import dayjs from 'dayjs'
 import {
@@ -11,6 +11,8 @@ import {
 import { deliveries_mock } from '../data/deliveries'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import DeliveryCard from '../components/DeliveryCard'
+import getOrders from '../services/getOrders'
+import { Order } from '../types/Order'
 
 const getDateRange = (filter: string) => {
   const now = new Date()
@@ -49,6 +51,7 @@ const getDateRange = (filter: string) => {
 const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState('Todos')
   const [dateFilter, setDateFilter] = useState('Todas')
+  const [orders, setOrders] = useState<Order[]>([])
 
   let filteredDeliveries = deliveries_mock.filter(d =>
     statusFilter === 'Todos' ? true : d.status === statusFilter,
@@ -102,6 +105,12 @@ const Dashboard = () => {
 
     return Number(a.id) - Number(b.id)
   })
+
+  useEffect(() => {
+    getOrders().then(orders => setOrders(orders))
+  }, [])
+
+  console.log(orders)
 
   return (
     <div
