@@ -1,142 +1,172 @@
-import React, { useEffect, useState } from 'react'
-import Chart from 'react-apexcharts'
-import dayjs from 'dayjs'
-import {
-  Box,
-  Typography,
-  Paper,
-  MenuItem,
-  Select,
-} from '@mui/material'
-import { deliveries_mock } from '../data/deliveries'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import DeliveryCard from '../components/DeliveryCard'
-import getOrders from '../services/getOrders'
-import { Order } from '../types/Order'
+import React, { useEffect, useState } from 'react';
+import Chart from 'react-apexcharts';
+import dayjs from 'dayjs';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import { Box, Typography, Paper, MenuItem, Select } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import getFilter from '../services/getReportRange';
+import { Order } from '../types/Order';
+import DeliveryCard from '../components/DeliveryCard';
 
-const getDateRange = (filter: string) => {
-  const now = new Date()
-  const start = new Date()
-  const end = new Date()
-
-  switch (filter) {
-    case 'Today':
-      start.setHours(0, 0, 0, 0)
-      end.setHours(23, 59, 59, 999)
-      break
-    case 'ThisWeek':
-      start.setDate(now.getDate() - now.getDay())
-      start.setHours(0, 0, 0, 0)
-      end.setDate(start.getDate() + 6)
-      end.setHours(23, 59, 59, 999)
-      break
-    case 'ThisMonth':
-      start.setDate(1)
-      start.setHours(0, 0, 0, 0)
-      end.setMonth(now.getMonth() + 1, 0)
-      end.setHours(23, 59, 59, 999)
-      break
-    case 'ThisYear':
-      start.setMonth(0, 1)
-      start.setHours(0, 0, 0, 0)
-      end.setMonth(11, 31)
-      end.setHours(23, 59, 59, 999)
-      break
-    default:
-      return null
-  }
-  return { start, end }
-}
+type ChartData = {
+  series: number[];
+  options: {
+    labels: string[];
+    legend: { position: 'bottom' };
+    chart: { type: 'pie'; toolbar: { show: boolean } };
+  };
+};
 
 const Dashboard = () => {
-  const [statusFilter, setStatusFilter] = useState('Todos')
-  const [dateFilter, setDateFilter] = useState('Todas')
-  const [orders, setOrders] = useState<Order[]>([])
-
-  let filteredDeliveries = deliveries_mock.filter(d =>
-    statusFilter === 'Todos' ? true : d.status === statusFilter,
-  )
-
-  const range = getDateRange(dateFilter)
-  if (range) {
-    const start = dayjs(range.start)
-    const end = dayjs(range.end)
-
-    filteredDeliveries = filteredDeliveries.filter(d => {
-      const deliveryDate = dayjs(d.date)
-      const isOnTheRange =
-        deliveryDate.isAfter(start) && deliveryDate.isBefore(end)
-      const isToday =
-        deliveryDate.isSame(start, 'date') && deliveryDate.isSame(end, 'date')
-
-      return isOnTheRange || isToday
-    })
-  }
-
-  const chartData = {
-    series: filteredDeliveries.map(delivery => delivery.cost),
+  dayjs.extend(weekOfYear);
+  const [statusFilter, setStatusFilter] = useState('Todos');
+  const [dateFilter, setDateFilter] = useState('Todas');
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [chartData, setChartData] = useState<ChartData>({
+    series: [],
     options: {
-      labels: filteredDeliveries.map(delivery => {
-        const labels = {
-          Today: delivery.id,
-          Todas: dayjs(delivery.date).format('YYYY'),
-          ThisWeek: dayjs(delivery.date).format('DD/MM'),
-          ThisMonth: dayjs(delivery.date).format('DD/MM'),
-          ThisYear: dayjs(delivery.date).format('MM'),
-        }[dateFilter]
-
-        if (!labels) return delivery.id
-
-        return labels
-      }),
-      legend: { position: 'bottom' as const },
-      chart: { type: 'pie' as const, toolbar: { show: false } },
+      labels: [],
+      legend: { position: 'bottom' },
+      chart: { type: 'pie', toolbar: { show: false } },
     },
-  }
+  });
 
-  const mobile = useMediaQuery('(max-width:767px)')
+  const mobile = useMediaQuery('(max-width:767px)');
 
-  filteredDeliveries.sort((a, b) => {
-    const dateA = dayjs(a.date)
-    const dateB = dayjs(b.date)
+  const fetchOrders = async () => {
+    try {
+      const filter = {
+        filter:
+          dateFilter === 'Today'
+            ? 'Today'
+            : dateFilter === 'ThisWeek'
+            ? 'Week'
+            : dateFilter === 'ThisMonth'
+            ? 'Month'
+            : dateFilter === 'ThisYear'
+            ? 'Year'
+            : undefined,
+        status:
+          statusFilter === 'Todos'
+            ? undefined
+            : statusFilter.toUpperCase().replace(' ', '_'),
+      };
 
-    if (dateA.isBefore(dateB)) return -1
-    if (dateA.isAfter(dateB)) return 1
+      const data = await getFilter(filter);
+      const normalizedOrders: Order[] = [];
 
-    return Number(a.id) - Number(b.id)
-  })
+      Object.entries(data).forEach(([, order]: [string, Order]) => {
+        normalizedOrders.push(order);
+      });
+
+      setOrders(normalizedOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
 
   useEffect(() => {
-    getOrders().then(orders => setOrders(orders))
-  }, [])
+    fetchOrders();
+  }, [statusFilter, dateFilter]);
 
-  console.log(orders)
+  useEffect(() => {
+    if (orders.length === 0) {
+      return;
+    }
+
+    try {
+      const deliveriesGrouped = orders.reduce(
+        (acc, order) => {
+          const createdAt = dayjs(order.createdAt);
+          let label = '';
+
+          if (dateFilter === 'ThisYear') {
+            label = createdAt.format('MM/YYYY');
+          }
+
+          else if (dateFilter === 'ThisMonth') {
+            label = `Semana ${createdAt.week()}`; 
+          }
+
+          else if (dateFilter === 'ThisWeek') {
+            label = createdAt.format('dddd'); 
+          }
+
+          else if (dateFilter === 'Today') {
+            label = createdAt.format('HH:mm');
+          }
+
+          else if (dateFilter === 'Todas') {
+            label = createdAt.format('MM/YYYY'); // Meses do ano
+          }
+
+          if (!acc[label]) acc[label] = 0;
+          acc[label] += order.cost ?? 0;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+
+      if (Object.keys(deliveriesGrouped).length === 0) {
+        setChartData({
+          series: [],
+          options: {
+            labels: ['Nenhuma entrega encontrada'],
+            legend: { position: 'bottom' },
+            chart: { type: 'pie', toolbar: { show: false } },
+          },
+        });
+      } else {
+        setChartData({
+          series: Object.values(deliveriesGrouped),
+          options: {
+            labels: Object.keys(deliveriesGrouped),
+            legend: { position: 'bottom' },
+            chart: { type: 'pie', toolbar: { show: false } },
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error updating chart data:', error);
+    }
+  }, [orders, dateFilter]);
+
+  const filteredDeliveries: Order[] = orders.filter((order) => {
+    const statusMatch =
+      statusFilter === 'Todos' || order.status === statusFilter;
+    const dateMatch =
+      dateFilter === 'Todas' ||
+      (dateFilter === 'Today' && dayjs(order.createdAt).isSame(dayjs(), 'day')) ||
+      (dateFilter === 'ThisWeek' &&
+        dayjs(order.createdAt).isSame(dayjs(), 'week')) ||
+      (dateFilter === 'ThisMonth' &&
+        dayjs(order.createdAt).isSame(dayjs(), 'month')) ||
+      (dateFilter === 'ThisYear' &&
+        dayjs(order.createdAt).isSame(dayjs(), 'year'));
+    return statusMatch && dateMatch;
+  });
 
   return (
-    <div
-      style={{
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}
-    >
+    <div style={{ padding: '20px', backgroundColor: '#f9f9f9' }}>
       <Box
         display="flex"
         justifyContent="space-around"
         alignItems="flex-start"
+        flexDirection={mobile ? 'column' : 'row'}
         flexWrap="wrap"
-        flexDirection={mobile ? 'column-reverse' : 'row'}
       >
         <Paper
           elevation={3}
           sx={{
-            width: mobile ? 'calc(100% - 16px)' : '45%',
+            width: mobile ? '100%' : '45%', 
             p: mobile ? 1 : 3,
+            mb: mobile ? 2 : 0,
           }}
         >
           <Typography variant="h6" gutterBottom>
             Nossas Entregas
           </Typography>
-          {filteredDeliveries.length > 0 ? (
+          {chartData.series.length > 0 ? (
             <Chart
               options={chartData.options}
               series={chartData.series}
@@ -153,7 +183,7 @@ const Dashboard = () => {
         <Paper
           elevation={3}
           sx={{
-            width: mobile ? 'calc(100% - 16px)' : '25%',
+            width: mobile ? '100%' : '25%',
             p: mobile ? 1 : 3,
             mt: { xs: 3, md: 0 },
           }}
@@ -161,21 +191,23 @@ const Dashboard = () => {
           <Typography variant="h6" gutterBottom>
             Filtros
           </Typography>
-            <Select
+          <Select
             value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
+            onChange={(e) => setStatusFilter(e.target.value)}
             displayEmpty
             fullWidth
-            >
+          >
             <MenuItem value="Todos">Todos</MenuItem>
-            <MenuItem value="Entregue">Entregues</MenuItem>
-            <MenuItem value="Pendente">Pendentes</MenuItem>
-            <MenuItem value="Recusada">Recusadas</MenuItem>
-            </Select>
+            <MenuItem value="WAITING_RESPONSE">Aguardando Resposta</MenuItem>
+            <MenuItem value="SEPARATING">Separando</MenuItem>
+            <MenuItem value="ON_THE_WAY">A Caminho</MenuItem>
+            <MenuItem value="DELIVERED">Entregue</MenuItem>
+            <MenuItem value="REFUSED">Recusada</MenuItem>
+          </Select>
 
           <Select
             value={dateFilter}
-            onChange={e => setDateFilter(e.target.value)}
+            onChange={(e) => setDateFilter(e.target.value)}
             displayEmpty
             fullWidth
             sx={{ mt: 3 }}
@@ -188,7 +220,6 @@ const Dashboard = () => {
           </Select>
         </Paper>
       </Box>
-
       <Box
         marginY={3}
         display="grid"
@@ -196,8 +227,8 @@ const Dashboard = () => {
         gap={4}
       >
         {filteredDeliveries
-          .sort((a, b) => Number(a.id) - Number(b.id))
-          .map(delivery => (
+          .sort((a: Order, b: Order) => Number(a.id) - Number(b.id))
+          .map((delivery: Order) => (
             <Box
               key={delivery.id}
               sx={{
@@ -220,13 +251,20 @@ const Dashboard = () => {
                   alignItems: 'center',
                 }}
               >
-                <DeliveryCard delivery={delivery} />
+                <DeliveryCard
+                  delivery={{
+                    id: delivery.id ?? 'N/A',
+                    distance: delivery.distance ? delivery.distance.toString() : 'N/A',
+                    cost: delivery.cost ?? 0,
+                    status: delivery.status,
+                  }}
+                />
               </Box>
             </Box>
           ))}
       </Box>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

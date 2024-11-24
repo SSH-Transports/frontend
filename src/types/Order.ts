@@ -18,4 +18,6 @@ export interface Order {
   adminId?: string
   courierId?: string
   customerId: string
+  createdAt?: string
+  updatedAt?: string
 }

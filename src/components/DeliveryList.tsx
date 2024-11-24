@@ -19,7 +19,12 @@ const DeliveryList: React.FC<DeliveryListProps> = ({ deliveries }) => {
     <Grid container spacing={2}>
       {deliveries.map(delivery => (
         <Grid item xs={12} md={6} lg={4} key={delivery.id}>
-          <DeliveryCard delivery={delivery} />
+          <DeliveryCard
+            delivery={{
+              ...delivery,
+              distance: delivery.distance.toString(),
+            }}
+          />
         </Grid>
       ))}
     </Grid>

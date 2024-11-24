@@ -5,10 +5,9 @@ import { AccessAlarm, CheckCircle, Clear, Person, Money, LocalTaxi } from '@mui/
 interface DeliveryCardProps {
   delivery: {
     id: string
-    status: string
+    distance: string
     cost: number
-    motoboy: string
-    distance: number
+    status: string
   }
 }
 
@@ -42,7 +41,7 @@ const DeliveryCard: React.FC<DeliveryCardProps> = ({ delivery }) => {
     }}>
       <CardContent sx={{ padding: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" color="textPrimary">
+          <Typography fontSize={"12px"} variant="h6" color="textPrimary">
             ID: {delivery.id}
           </Typography>
           {getStatusIcon(delivery.status)}
@@ -51,7 +50,7 @@ const DeliveryCard: React.FC<DeliveryCardProps> = ({ delivery }) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Person sx={{ marginRight: 1, color: 'text.secondary' }} />
-            <Typography variant="body2">{delivery.motoboy}</Typography>
+            <Typography variant="body2">{"Nome do motoboy"}</Typography>
           </Box>
           
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
