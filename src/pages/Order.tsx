@@ -1,6 +1,6 @@
 import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css"; // Certifique-se de adicionar o CSS do Leaflet
+import "leaflet/dist/leaflet.css";
 import { order_mock } from "../data/order";
 
 const MotoboyPageOrder: React.FC = () => {
@@ -66,7 +66,20 @@ const MotoboyPageOrder: React.FC = () => {
                         cursor: "pointer",
                     }}
                 >
-                    Entregue
+                    Aceitar
+                </button>
+                <button
+                    onClick={handleDecline}
+                    style={{
+                        padding: "10px 20px",
+                        backgroundColor: "red",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                    }}
+                >
+                    Recusar
                 </button>
             </div>
         </div>
