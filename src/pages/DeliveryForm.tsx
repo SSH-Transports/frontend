@@ -152,7 +152,7 @@ const DeliveryForm: React.FC = () => {
                 color="primary"
                 onClick={handleFinish}
                 fullWidth
-                style={{ marginTop: 'auto' }}
+                style={{ marginTop: '10px' }}
               >
                 Fazer pedido
               </Button>
