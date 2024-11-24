@@ -17,6 +17,7 @@ import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import postLogin from '../services/postLogin'
+import { toast } from 'react-toastify';
 
 const ContainerStyled = styled(Container)({
   display: 'flex',
@@ -79,8 +80,9 @@ const LoginPage: React.FC = () => {
     const login = await postLogin(data)
     if (login.access_token) {
       localStorage.setItem('token', login.access_token)
+      toast.success('Login feito com sucesso')
     } else {
-      alert('Não foi possível criar esse usuário')
+      toast.error('Erro ao fazer login')
     }
   }
 

@@ -25,6 +25,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import postSignUp from '../services/postSignUp'
 import { UserRoles } from '../types/User'
 import { omit } from 'lodash'
+import { toast } from 'react-toastify';
 
 const schema = z
   .object({
@@ -104,8 +105,9 @@ const SignupPage: React.FC = () => {
     const newUser = await postSignUp(omit(data, ['confirmPassword']))
     if (newUser.id) {
       navigate('/login');
+      toast.success('Usuário criado com sucesso');
     } else {
-      alert('Não foi possível criar esse usuário');
+      toast.error('Erro ao criar usuário');
     }
   }
 
