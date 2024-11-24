@@ -66,20 +66,7 @@ const MotoboyPageOrder: React.FC = () => {
                         cursor: "pointer",
                     }}
                 >
-                    Aceitar
-                </button>
-                <button
-                    onClick={handleDecline}
-                    style={{
-                        padding: "10px 20px",
-                        backgroundColor: "red",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                    }}
-                >
-                    Recusar
+                    Entregue
                 </button>
             </div>
         </div>
