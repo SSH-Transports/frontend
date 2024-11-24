@@ -3,6 +3,7 @@ import api from './api'
 interface Login {
   email: string
   password: string
+  isFromMobile: boolean
 }
 
 export default function postLogin(
