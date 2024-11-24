@@ -1,21 +1,45 @@
 import React, { useState } from 'react'
-import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText } from '@mui/material'
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  ListItemIcon,
+  Box,
+} from '@mui/material'
 import { Link } from 'react-router-dom'
 import MenuIcon from '@mui/icons-material/Menu'
+import LoginIcon from '@mui/icons-material/Login'
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
+import AssignmentIcon from '@mui/icons-material/Assignment'
+import HistoryIcon from '@mui/icons-material/History'
 
 const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-    if (event.type === 'keydown' && ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')) {
-      return
+  const toggleDrawer =
+    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+      if (
+        event.type === 'keydown' &&
+        ((event as React.KeyboardEvent).key === 'Tab' ||
+          (event as React.KeyboardEvent).key === 'Shift')
+      ) {
+        return
+      }
+      setDrawerOpen(open)
     }
-    setDrawerOpen(open)
-  }
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ backgroundColor: '#06486b' }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             LAP Informática
@@ -30,40 +54,93 @@ const Navbar: React.FC = () => {
           </IconButton>
         </Toolbar>
       </AppBar>
+
       <Drawer
         anchor="left"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
         sx={{
           '& .MuiDrawer-paper': {
-            width: 210, 
+            width: 250,
+            backgroundColor: '#2c3e50',
+            color: 'white',
           },
         }}
       >
+        <Box sx={{ padding: '16px', textAlign: 'center' }}>
+          <Typography variant="h6">LAP Informática</Typography>
+        </Box>
+        <Divider sx={{ backgroundColor: '#7f8c8d' }} />
         <List>
-          <Typography variant="h6" paddingLeft="16px" sx={{ flexGrow: 1 }}>
-            LAP Informática
-          </Typography>
           <ListItem component={Link} to="/login" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Login" />
+            <ListItemIcon>
+              <LoginIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText primary="Login" sx={{ color: '#ecf0f1' }} />
           </ListItem>
+
           <ListItem component={Link} to="/signup" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Cadastro" />
+            <ListItemIcon>
+              <PersonAddIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText primary="Cadastro" sx={{ color: '#ecf0f1' }} />
           </ListItem>
-          <ListItem component={Link} to="/dashboard" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Dashboard" />
+
+          <ListItem
+            component={Link}
+            to="/dashboard"
+            onClick={toggleDrawer(false)}
+          >
+            <ListItemIcon>
+              <DashboardIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText primary="Dashboard" sx={{ color: '#ecf0f1' }} />
           </ListItem>
+
           <ListItem component={Link} to="/admin" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Admin" />
+            <ListItemIcon>
+              <AdminPanelSettingsIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText primary="Admin" sx={{ color: '#ecf0f1' }} />
           </ListItem>
-          <ListItem component={Link} to="/delivery-form" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Solicitar pedido" />
+
+          <ListItem
+            component={Link}
+            to="/delivery-form"
+            onClick={toggleDrawer(false)}
+          >
+            <ListItemIcon>
+              <AddShoppingCartIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Solicitar pedido"
+              sx={{ color: '#ecf0f1' }}
+            />
           </ListItem>
-          <ListItem component={Link} to="/order/:id" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Pedido" />
+
+          <ListItem
+            component={Link}
+            to="/order/:id"
+            onClick={toggleDrawer(false)}
+          >
+            <ListItemIcon>
+              <AssignmentIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText primary="Pedido" sx={{ color: '#ecf0f1' }} />
           </ListItem>
-          <ListItem component={Link} to="/motoboy-history" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Histórico de pedidos" />
+
+          <ListItem
+            component={Link}
+            to="/motoboy-history"
+            onClick={toggleDrawer(false)}
+          >
+            <ListItemIcon>
+              <HistoryIcon sx={{ color: '#ecf0f1' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Histórico de pedidos"
+              sx={{ color: '#ecf0f1' }}
+            />
           </ListItem>
         </List>
       </Drawer>
