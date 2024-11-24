@@ -13,6 +13,8 @@ import {
   SignupPage,
   AdminPage,
 } from './pages'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 import theme from './theme'
 
@@ -22,6 +24,7 @@ const App: React.FC = () => {
       <UserProvider>
         <Router>
           <Navbar />
+          <ToastContainer />
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
