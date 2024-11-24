@@ -1,16 +1,17 @@
-import React, { useState } from 'react'
 import {
-  TextField,
+  Box,
   Button,
-  Typography,
   Container,
   Grid,
-  Box,
+  TextField,
+  Typography,
 } from '@mui/material'
-import AddressPicker from '../components/AddressPicker'
-import postOrder from '../services/postOrder'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+import { toast } from 'react-toastify'
+import AddressPicker from '../components/AddressPicker'
+import { useUserContext } from '../context/userContext'
+import postOrder from '../services/postOrder'
 import { OrderStatus } from '../types/Order'
 
 type Destination = {
@@ -21,6 +22,7 @@ type Destination = {
 
 const DeliveryForm: React.FC = () => {
   const navigate = useNavigate()
+  const { user } = useUserContext()
 
   const [weight, setWeight] = useState('')
   const [distance, setDistance] = useState('')
@@ -79,18 +81,17 @@ const DeliveryForm: React.FC = () => {
     try {
       console.log('Iniciando criação de pedido...');
       const newOrder = await postOrder({
-        id: '1',
         weight,
         distance,
         cost,
         time,
         latitude: destination?.lat as number,
         longitude: destination?.lng as number,
-        customerId: '1',
         status: OrderStatus.WAITING_RESPONSE,
+        customerId: user?.id as string,
       });
       console.log('Order created: ', newOrder);
-  
+
       navigate('/dashboard');
       toast.success('Pedido realizado com sucesso!');
     } catch (error: unknown) {
@@ -99,7 +100,7 @@ const DeliveryForm: React.FC = () => {
       toast.error(errorMessage);
     }
   };
-  
+
 
   return (
     <Container style={styles.container}>

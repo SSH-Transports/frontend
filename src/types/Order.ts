@@ -4,7 +4,7 @@ export enum OrderStatus {
   ON_THE_WAY = 'ON_THE_WAY',
   DELIVERED = 'DELIVERED',
   REFUSED = 'REFUSED'
-}
+};
 
 export interface Order {
   id?: string
@@ -14,8 +14,8 @@ export interface Order {
   time: string
   distance: string
   cost: number
-  status?: OrderStatus
+  status: OrderStatus
   adminId?: string
   courierId?: string
-  customerId: string   
+  customerId: string
 }
