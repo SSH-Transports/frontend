@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem, ListItemText, Box } from '@mui/material'
+import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText } from '@mui/material'
 import { Link } from 'react-router-dom'
 import MenuIcon from '@mui/icons-material/Menu'
 
@@ -20,23 +20,11 @@ const Navbar: React.FC = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             LAP Informática
           </Typography>
-          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-            <Button color="inherit" component={Link} to="/dashboard">
-              Dashboard
-            </Button>
-            <Button color="inherit" component={Link} to="/login">
-              Login
-            </Button>
-            <Button color="inherit" component={Link} to="/signup">
-              Cadastro
-            </Button>
-          </Box>
           <IconButton
             edge="end"
             color="inherit"
             aria-label="menu"
             onClick={toggleDrawer(true)}
-            sx={{ display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
@@ -53,14 +41,29 @@ const Navbar: React.FC = () => {
         }}
       >
         <List>
-          <ListItem component={Link} to="/dashboard" onClick={toggleDrawer(false)}>
-            <ListItemText primary="Dashboard" />
-          </ListItem>
+          <Typography variant="h6" paddingLeft="16px" sx={{ flexGrow: 1 }}>
+            LAP Informática
+          </Typography>
           <ListItem component={Link} to="/login" onClick={toggleDrawer(false)}>
             <ListItemText primary="Login" />
           </ListItem>
           <ListItem component={Link} to="/signup" onClick={toggleDrawer(false)}>
             <ListItemText primary="Cadastro" />
+          </ListItem>
+          <ListItem component={Link} to="/dashboard" onClick={toggleDrawer(false)}>
+            <ListItemText primary="Dashboard" />
+          </ListItem>
+          <ListItem component={Link} to="/admin" onClick={toggleDrawer(false)}>
+            <ListItemText primary="Admin" />
+          </ListItem>
+          <ListItem component={Link} to="/delivery-form" onClick={toggleDrawer(false)}>
+            <ListItemText primary="Solicitar pedido" />
+          </ListItem>
+          <ListItem component={Link} to="/order/:id" onClick={toggleDrawer(false)}>
+            <ListItemText primary="Pedido" />
+          </ListItem>
+          <ListItem component={Link} to="/motoboy-history" onClick={toggleDrawer(false)}>
+            <ListItemText primary="Histórico de pedidos" />
           </ListItem>
         </List>
       </Drawer>
