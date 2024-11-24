@@ -10,6 +10,7 @@ import {
 import AddressPicker from '../components/AddressPicker'
 import postOrder from '../services/postOrder'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify';
 
 type Destination = {
   lat: number
@@ -86,6 +87,7 @@ const DeliveryForm: React.FC = () => {
     console.log('Order created: ', newOrder)
     setTimeout(() => {
       navigate('/dashboard')
+      toast.success('Pedido realizado com sucesso!')
     }, 2000)
   }
 
