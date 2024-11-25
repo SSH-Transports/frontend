@@ -6,6 +6,14 @@ export enum OrderStatus {
   REFUSED = 'REFUSED'
 };
 
+export const OrderStatusNames = {
+  WAITING_RESPONSE: 'Aguardando Resposta',
+  SEPARATING: 'Separando',
+  ON_THE_WAY: 'A Caminho',
+  DELIVERED: 'Entregue',
+  REFUSED: 'Recusada'
+};
+
 export interface Order {
   id?: string
   latitude: number
