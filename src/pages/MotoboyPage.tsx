@@ -5,7 +5,9 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import { useParams } from 'react-router-dom';
-import { order_mock } from '../data/order';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import getCourierOrders from '../services/getCourierOrders';
 
 interface Delivery {
   id: number;
@@ -31,8 +33,18 @@ const MotoboyPage: React.FC = () => {
   const { motoboyId } = useParams<{ motoboyId: string }>();
 
   useEffect(() => {
-    const filteredDeliveries = order_mock.filter((order) => order.motoboyId === Number(motoboyId));
-    setDeliveries(filteredDeliveries);
+    const fetchDeliveries = async () => {
+      const response = await getCourierOrders(motoboyId!);
+      if (Array.isArray(response)) {
+        setDeliveries(response);
+      } else {
+        toast.error('Erro ao buscar pedidos na API');
+      }
+    }
+
+    if (motoboyId) {
+      fetchDeliveries();
+    }
   }, [motoboyId]);
 
   return (
