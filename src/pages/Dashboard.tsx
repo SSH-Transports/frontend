@@ -208,7 +208,7 @@ const Dashboard = () => {
             <MenuItem value="REFUSED">Recusada</MenuItem>
           </Select>
 
-          <Select
+          {/* <Select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             displayEmpty
@@ -220,7 +220,7 @@ const Dashboard = () => {
             <MenuItem value="ThisWeek">Esta Semana</MenuItem>
             <MenuItem value="ThisMonth">Este Mês</MenuItem>
             <MenuItem value="ThisYear">Este Ano</MenuItem>
-          </Select>
+          </Select> */}
         </Paper>
       </Box>
       <Box
