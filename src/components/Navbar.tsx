@@ -156,7 +156,7 @@ const Navbar: React.FC = () => {
               {[UserRoles.ADMIN, UserRoles.COURIER].includes(user.role) && (
                 <ListItem
                   component={Link}
-                  to="/motoboy-history"
+                  to={`/motoboy/${user?.id}`}
                   onClick={toggleDrawer(false)}
                 >
                   <ListItemIcon>
