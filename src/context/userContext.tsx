@@ -43,7 +43,6 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
   }, [tokenStorage])
 
   const fetchUser = async () => {
-    console.log(token)
     if (tokenStorage) {
       const decoded = jwtDecode(tokenStorage as string)
       /* if (decoded && decoded.exp && decoded.exp < Date.now() / 1000) {
@@ -52,7 +51,6 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
         if (typeof decoded.sub === 'string') {
           await getUser(decoded.sub)
             .then(response => {
-              console.log(response)
               setUser(response)
             })
             .catch(error => {
@@ -72,9 +70,6 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
       setUser(userStorage)
     }
   }, [userStorage, user])
-
-  console.log(token)
-  console.log(user)
 
   const values = useMemo(() => {
     return {
