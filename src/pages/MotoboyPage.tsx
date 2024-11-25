@@ -1,49 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Grid, IconButton, List, ListItem, ListItemText, Divider } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import { Box, Card, CardContent, Divider, Grid, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import getCourierOrders from '../services/getCourierOrders';
-
-interface Delivery {
-  id: number;
-  motoboyId: number;
-  nomeDoProduto: string;
-  enderecoColeta: {
-    descricao: string;
-    latitude: number;
-    longitude: number;
-  };
-  enderecoEntrega: {
-    descricao: string;
-    latitude: number;
-    longitude: number;
-  };
-  valor: number;
-  peso: number;
-  data: string;
-}
+import { Order, OrderStatusNames } from '../types/Order';
+import dayjs from 'dayjs';
 
 const MotoboyPage: React.FC = () => {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [deliveries, setDeliveries] = useState<Order[]>([]);
   const { motoboyId } = useParams<{ motoboyId: string }>();
 
-  useEffect(() => {
-    const fetchDeliveries = async () => {
-      const response = await getCourierOrders(motoboyId!);
-      if (Array.isArray(response)) {
-        setDeliveries(response);
-      } else {
-        toast.error('Erro ao buscar pedidos na API');
-      }
+  const fetchDeliveries = async (motoboyId: string) => {
+    const response = await getCourierOrders(motoboyId);
+    
+    if (response) {
+      setDeliveries(response);
     }
+  }
+
+  useEffect(() => {
+    console.log(motoboyId);
 
     if (motoboyId) {
-      fetchDeliveries();
+      fetchDeliveries(motoboyId);
     }
   }, [motoboyId]);
 
@@ -63,22 +46,22 @@ const MotoboyPage: React.FC = () => {
                     Pedido #{delivery.id}
                   </Typography>
                   <List>
-                    <ListItem>
+                    {/* <ListItem>
                       <IconButton edge="start">
                         <LocationOnIcon sx={{ color: '#06486b' }} />
                       </IconButton>
                       <ListItemText
                         primary="Endereço de Retirada"
-                        secondary={delivery.enderecoColeta.descricao}
+                        secondary={delivery.latitude}
                       />
-                    </ListItem>
+                    </ListItem> */}
                     <ListItem>
                       <IconButton edge="start">
                         <LocationOnIcon sx={{ color: '#06486b' }} />
                       </IconButton>
                       <ListItemText
                         primary="Endereço de Entrega"
-                        secondary={delivery.enderecoEntrega.descricao}
+                        secondary={`${delivery.latitude}, ${delivery.longitude}`}
                       />
                     </ListItem>
                     <ListItem>
@@ -87,7 +70,7 @@ const MotoboyPage: React.FC = () => {
                       </IconButton>
                       <ListItemText
                         primary="Data"
-                        secondary={new Date(delivery.data).toLocaleString()}
+                        secondary={dayjs(delivery.createdAt).format('DD/MM/YYYY')}
                       />
                     </ListItem>
                     <ListItem>
@@ -96,7 +79,7 @@ const MotoboyPage: React.FC = () => {
                       </IconButton>
                       <ListItemText
                         primary="Valor do Frete"
-                        secondary={`R$ ${delivery.valor.toFixed(2)}`}
+                        secondary={`R$ ${delivery.cost.toFixed(2)}`}
                       />
                     </ListItem>
                   </List>
@@ -104,7 +87,7 @@ const MotoboyPage: React.FC = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <DirectionsBikeIcon sx={{ marginRight: '8px', color: '#06486b' }} />
                     <Typography variant="body2" sx={{ color: '#06486b' }}>
-                      Em Andamento
+                      {OrderStatusNames[delivery.status]}
                     </Typography>
                   </Box>
                 </CardContent>
