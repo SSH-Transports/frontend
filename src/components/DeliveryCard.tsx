@@ -1,6 +1,7 @@
 import React from 'react'
 import { Card, CardContent, Typography, Box } from '@mui/material'
 import { Person, Money, LocalTaxi } from '@mui/icons-material'
+import { OrderStatus, OrderStatusNames } from '../types/Order';
 
 interface DeliveryCardProps {
   delivery: {
@@ -52,10 +53,9 @@ const DeliveryCard: React.FC<DeliveryCardProps> = ({ delivery }) => {
             <Typography variant="body2">R$ {delivery.cost.toFixed(2)}</Typography>
           </Box>
         </Box>
-
         <Box sx={{ marginTop: 'auto', textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            Status: {delivery.status}
+            Status: {OrderStatusNames[delivery.status as OrderStatus]}
           </Typography>
         </Box>
       </CardContent>
