@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import getOrderById from '../services/getOrderById'
 import { Order } from '../types/Order'
 import { toast } from 'react-toastify'
 import { useParams } from 'react-router-dom'
+import RoomIcon from '@mui/icons-material/Room';
 
 const MotoboyPageOrder: React.FC = () => {
   const params = useParams()
@@ -49,49 +50,16 @@ const MotoboyPageOrder: React.FC = () => {
       <div style={{ height: '300px', margin: '20px 0' }}>
         <MapContainer
           center={[order.latitude, order.longitude]}
-          zoom={13}
+          zoom={15}
           style={{ height: '100%', width: '100%' }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          <Marker position={[order.latitude, order.longitude]}>
-            <Popup>Local de Coleta</Popup>
-          </Marker>
-          <Marker position={[order.latitude, order.longitude]}>
-            <Popup>Local de Entrega</Popup>
-          </Marker>
+          <CircleMarker center={[order.latitude, order.longitude]} radius={10}>
+          </CircleMarker>
         </MapContainer>
-      </div>
-      <div>
-        <button
-          onClick={handleAccept}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: 'green',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            marginRight: '10px',
-            cursor: 'pointer',
-          }}
-        >
-          Aceitar
-        </button>
-        <button
-          onClick={handleDecline}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: 'red',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          Recusar
-        </button>
       </div>
     </div>
   ) : (

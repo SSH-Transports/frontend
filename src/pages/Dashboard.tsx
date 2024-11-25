@@ -7,6 +7,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import getFilter from '../services/getReportRange';
 import { Order } from '../types/Order';
 import DeliveryCard from '../components/DeliveryCard';
+import { useNavigate } from 'react-router-dom';
 
 type ChartData = {
   series: number[];
@@ -32,6 +33,8 @@ const Dashboard = () => {
   });
 
   const mobile = useMediaQuery('(max-width:767px)');
+
+  const navigate = useNavigate()
 
   const fetchOrders = async () => {
     try {
@@ -237,6 +240,7 @@ const Dashboard = () => {
                 padding: '8px',
                 width: '100%',
               }}
+              onClick={() => navigate(`/order/${delivery.id}`)}
             >
               <Box
                 sx={{
