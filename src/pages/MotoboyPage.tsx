@@ -3,12 +3,12 @@ import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import { Box, Card, CardContent, Divider, Grid, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import getCourierOrders from '../services/getCourierOrders';
 import { Order, OrderStatusNames } from '../types/Order';
-import dayjs from 'dayjs';
 
 const MotoboyPage: React.FC = () => {
   const [deliveries, setDeliveries] = useState<Order[]>([]);
@@ -16,7 +16,7 @@ const MotoboyPage: React.FC = () => {
 
   const fetchDeliveries = async (motoboyId: string) => {
     const response = await getCourierOrders(motoboyId);
-    
+
     if (response) {
       setDeliveries(response);
     }
@@ -33,7 +33,7 @@ const MotoboyPage: React.FC = () => {
   return (
     <Box sx={{ padding: '20px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ marginBottom: '20px', fontWeight: 'bold', textAlign: 'center' }}>
-        Histórico de Corridas - Motoboy {motoboyId}
+        Seu Histórico de Corridas
       </Typography>
 
       <Grid container spacing={3}>
