@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -11,22 +11,45 @@ import {
   Divider,
   ListItemIcon,
   Box,
-} from '@mui/material'
-import { Link } from 'react-router-dom'
-import MenuIcon from '@mui/icons-material/Menu'
-import LoginIcon from '@mui/icons-material/Login'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
-import AssignmentIcon from '@mui/icons-material/Assignment'
-import HistoryIcon from '@mui/icons-material/History'
-import LogoutIcon from '@mui/icons-material/Logout'
-import { useUserContext } from '../context/userContext'
-import { UserRoles } from '../types/User'
+  Badge,
+  Menu,
+  MenuItem,
+} from '@mui/material';
+import { Link } from 'react-router-dom';
+import MenuIcon from '@mui/icons-material/Menu';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import HistoryIcon from '@mui/icons-material/History';
+import LogoutIcon from '@mui/icons-material/Logout';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import MailIcon from '@mui/icons-material/Mail';
+import { useUserContext } from '../context/userContext';
+import { UserRoles } from '../types/User';
+import axios from 'axios';
 
 const Navbar: React.FC = () => {
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notifications, setNotifications] = useState<string[]>([]);
+  const { user, setUser } = useUserContext();
+  
+  // Busca notificações do backend (Fetch)
+  useEffect(() => {
+    if (user) {
+      axios
+        .get(`/api/notifications/${user.id}`)
+        .then((response) => {
+          setNotifications(response.data.notifications);
+        })
+        .catch((error) => {
+          console.error("Erro ao carregar notificações:", error);
+        });
+    }
+  }, [user]);  // Busca novamente as notificações sempre que o usuário muda (Re-Fetch)
 
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -35,12 +58,25 @@ const Navbar: React.FC = () => {
         ((event as React.KeyboardEvent).key === 'Tab' ||
           (event as React.KeyboardEvent).key === 'Shift')
       ) {
-        return
+        return;
       }
-      setDrawerOpen(open)
-    }
+      setDrawerOpen(open);
+    };
 
-  const { user } = useUserContext()
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
+    handleMenuClose();
+  };
+
+  const menuOpen = Boolean(anchorEl);
 
   return (
     <>
@@ -49,6 +85,51 @@ const Navbar: React.FC = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             LAP Informática
           </Typography>
+          <IconButton
+            color="inherit"
+            onClick={handleMenuOpen}
+            aria-label="notifications"
+            aria-controls="notification-menu"
+            aria-haspopup="true"
+          >
+            <Badge badgeContent={notifications.length} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+          <Menu
+            id="notification-menu"
+            anchorEl={anchorEl}
+            open={menuOpen}
+            onClose={handleMenuClose}
+            PaperProps={{
+              style: {
+                maxHeight: 200,
+                width: '300px',
+              },
+            }}
+          >
+            {notifications.length > 0 ? (
+              notifications.map((notification, index) => (
+                <MenuItem key={index} onClick={handleMenuClose}>
+                  <ListItemIcon>
+                    <MailIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText>{notification}</ListItemText>
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>
+                <Typography variant="body2" color="textSecondary">
+                  Sem notificações.
+                </Typography>
+              </MenuItem>
+            )}
+            <MenuItem onClick={handleClearNotifications}>
+              <Typography variant="body2" color="secondary">
+                Limpar todas as notificações
+              </Typography>
+            </MenuItem>
+          </Menu>
           <IconButton
             edge="end"
             color="inherit"
@@ -172,9 +253,10 @@ const Navbar: React.FC = () => {
                 component={Link}
                 to="/login"
                 onClick={() => {
-                  toggleDrawer(false)
-                  localStorage.setItem(`user`, ``)
-                  localStorage.setItem(`token`, ``)
+                  toggleDrawer(false);
+                  localStorage.setItem(`user`, ``);
+                  localStorage.setItem(`token`, ``);
+                  setUser(undefined);  // Clear user context
                 }}
               >
                 <ListItemIcon>
@@ -187,7 +269,7 @@ const Navbar: React.FC = () => {
         </List>
       </Drawer>
     </>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
