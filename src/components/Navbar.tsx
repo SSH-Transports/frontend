@@ -1,55 +1,96 @@
-import React, { useState, useEffect } from 'react';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import HistoryIcon from '@mui/icons-material/History';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MailIcon from '@mui/icons-material/Mail';
+import MenuIcon from '@mui/icons-material/Menu';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {
   AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
+  Badge,
+  Box,
+  Divider,
   Drawer,
+  IconButton,
   List,
   ListItem,
-  ListItemText,
-  Divider,
   ListItemIcon,
-  Box,
-  Badge,
+  ListItemText,
   Menu,
   MenuItem,
+  Toolbar,
+  Typography,
 } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import MenuIcon from '@mui/icons-material/Menu';
-import LoginIcon from '@mui/icons-material/Login';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import HistoryIcon from '@mui/icons-material/History';
-import LogoutIcon from '@mui/icons-material/Logout';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import MailIcon from '@mui/icons-material/Mail';
+import { io } from 'socket.io-client';
 import { useUserContext } from '../context/userContext';
+import api from '../services/api';
+import { Notification, NotificationStatus } from '../types/Notification';
 import { UserRoles } from '../types/User';
-import axios from 'axios';
 
 const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [notifications, setNotifications] = useState<string[]>([]);
-  const { user, logout} = useUserContext();
-  
-  // Busca notificações do backend (Fetch)
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { user, logout } = useUserContext();
+
+  const socket = io('http://localhost:8080');
+
+  const fetchNotifications = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await api(`/notifications/${user.id}`);
+      setNotifications(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+    }
+  };
+
+  const readNotification = async () => {
+    try {
+      const filteredNotifications = notifications.filter(({ status }) => {
+        return status === 'UNREAD';
+      }).map(({ id }) => id);
+
+      socket.emit('markAsRead', filteredNotifications);
+
+      setNotifications((prev) =>
+        prev.map((notification) => {
+          if (filteredNotifications.includes(notification.id)) {
+            return { ...notification, status: NotificationStatus.READ };
+          }
+          return notification;
+        })
+      );
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida:', error);
+    }
+  }
+
+  const menuOpen = Boolean(anchorEl);
+
+  useEffect(() => {
+    fetchNotifications();
+
+    socket.on('notification', (data: Notification) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+
+    return () => {
+      socket.off('notification');
+    };
+  }, [user?.id]);
+
   useEffect(() => {
     if (user) {
-      axios
-        .get(`/api/notifications/${user.id}`)
-        .then((response) => {
-          setNotifications(response.data.notifications);
-        })
-        .catch((error) => {
-          console.error("Erro ao carregar notificações:", error);
-        });
+      readNotification();
     }
-  }, [user]);  // Busca novamente as notificações sempre que o usuário muda (Re-Fetch)
+  }, [menuOpen]);
 
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -71,13 +112,6 @@ const Navbar: React.FC = () => {
     setAnchorEl(null);
   };
 
-  const handleClearNotifications = () => {
-    setNotifications([]);
-    handleMenuClose();
-  };
-
-  const menuOpen = Boolean(anchorEl);
-
   return (
     <>
       <AppBar position="static" sx={{ backgroundColor: '#06486b' }}>
@@ -85,17 +119,22 @@ const Navbar: React.FC = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             LAP Informática
           </Typography>
-          <IconButton
-            color="inherit"
-            onClick={handleMenuOpen}
-            aria-label="notifications"
-            aria-controls="notification-menu"
-            aria-haspopup="true"
-          >
-            <Badge badgeContent={notifications.length} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+
+          {user && (
+            <IconButton
+              color="inherit"
+              onClick={handleMenuOpen}
+              aria-label="notifications"
+              aria-controls="notification-menu"
+              aria-haspopup="true"
+            >
+              <Badge badgeContent={notifications.filter(({ status }) => {
+                return status === 'UNREAD';
+              }).length} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          )}
           <Menu
             id="notification-menu"
             anchorEl={anchorEl}
@@ -114,7 +153,7 @@ const Navbar: React.FC = () => {
                   <ListItemIcon>
                     <MailIcon color="primary" />
                   </ListItemIcon>
-                  <ListItemText>{notification}</ListItemText>
+                  <ListItemText>{notification.message}</ListItemText>
                 </MenuItem>
               ))
             ) : (
@@ -124,11 +163,6 @@ const Navbar: React.FC = () => {
                 </Typography>
               </MenuItem>
             )}
-            <MenuItem onClick={handleClearNotifications}>
-              <Typography variant="body2" color="secondary">
-                Limpar todas as notificações
-              </Typography>
-            </MenuItem>
           </Menu>
           <IconButton
             edge="end"
@@ -139,7 +173,7 @@ const Navbar: React.FC = () => {
             <MenuIcon />
           </IconButton>
         </Toolbar>
-      </AppBar>
+      </AppBar >
       <Drawer
         anchor="left"
         open={drawerOpen}
