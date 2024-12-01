@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
@@ -19,6 +19,8 @@ import PendingIcon from '@mui/icons-material/HourglassEmpty';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import CancelIcon from '@mui/icons-material/Cancel';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { Order, OrderStatus } from '../types/Order';
+import getOrders from '../services/getOrders';
 
 const fadeInSlideDown = keyframes`
   0% {
@@ -35,8 +37,8 @@ const AdminPage: React.FC = () => {
   const motoboys = Array.from(new Set(deliveries_mock.map((delivery) => delivery.motoboy)));
   const [selectedMotoboyMap, setSelectedMotoboyMap] = useState<{ [key: string]: string }>({});
   const [assignedDeliveries, setAssignedDeliveries] = useState<{ [key: string]: string }>({});
-  const [deliveries, setDeliveries] = useState(deliveries_mock);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [deliveries, setDeliveries] = useState<Order[]>([]);
   
   const mobile = useMediaQuery('(max-width:767px)');
 
@@ -44,21 +46,32 @@ const AdminPage: React.FC = () => {
     setDeliveries((prev) =>
       prev.map((delivery) =>
         delivery.id === deliveryId
-          ? { ...delivery, status: 'Entregue' }
+          ? { ...delivery, status: OrderStatus.DELIVERED } 
+          : delivery
+      )
+    );
+  };
+  
+  const handleRejectDelivery = (deliveryId: string) => {
+    setDeliveries((prev) =>
+      prev.map((delivery) =>
+        delivery.id === deliveryId
+          ? { ...delivery, status: OrderStatus.REFUSED } 
           : delivery
       )
     );
   };
 
-  const handleRejectDelivery = (deliveryId: string) => {
-    setDeliveries((prev) =>
-      prev.map((delivery) =>
-        delivery.id === deliveryId
-          ? { ...delivery, status: 'Recusada' }
-          : delivery
-      )
-    );
-  };
+  useEffect(() => {
+    getOrders().then((data) => {
+      console.log('Orders:', data); 
+      if (Array.isArray(data)) {
+        setDeliveries(data);
+      } else {
+        console.error('Data is not an array:', data);
+      }
+    });
+  }, []);
 
   const handleAssignMotoboy = (deliveryId: string, motoboyName: string) => {
     setAssignedDeliveries((prev) => ({
@@ -118,7 +131,7 @@ const AdminPage: React.FC = () => {
           gutterBottom
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
-        <LocalShippingIcon fontSize={mobile ? 'large' : 'inherit'} />
+          <LocalShippingIcon fontSize={mobile ? 'large' : 'inherit'} />
           Administração de Entregas
         </Typography>
         <Typography variant="body1" fontStyle="italic">
@@ -126,10 +139,10 @@ const AdminPage: React.FC = () => {
         </Typography>
       </Box>
 
-      {deliveries.map((delivery) => {
-        const isRefused = delivery.status === 'Recusada';
-        const isPending = delivery.status === 'Pendente';
-        const isAccepted = delivery.status === 'Entregue';
+      {Array.isArray(deliveries) && deliveries.map((delivery) => {
+        const isRefused = delivery.status === OrderStatus.REFUSED;
+        const isPending = delivery.status === OrderStatus.WAITING_RESPONSE;
+        const isAccepted = delivery.status === OrderStatus.DELIVERED;
 
         return (
           <Box
@@ -143,18 +156,18 @@ const AdminPage: React.FC = () => {
             borderColor={isRefused ? '#F44336' : '#e0e0e0'}
           >
             <Typography variant="h6" gutterBottom>
-              Entrega ID: {delivery.id} - {delivery.status === 'Pendente' ? (
+              Entrega ID: {delivery.id} - {delivery.status === OrderStatus.WAITING_RESPONSE ? (
                 <PendingIcon color="warning" />
-              ) : delivery.status === 'Entregue' ? (
+              ) : delivery.status === OrderStatus.DELIVERED ? (
                 <DoneIcon color="success" />
-              ) : delivery.status === 'Recusada' ? (
+              ) : delivery.status === OrderStatus.REFUSED ? (
                 <CancelIcon color="error" />
               ) : (
                 <DoneIcon color="success" />
               )}
             </Typography>
             <Typography variant="body2" color="textSecondary" gutterBottom>
-              Data: {delivery.date} - Distância: {delivery.distance} km - R${delivery.cost}
+              Data: {delivery.createdAt} - Distância: {delivery.distance} km - R${delivery.cost}
             </Typography>
 
             {isPending && (
@@ -162,7 +175,7 @@ const AdminPage: React.FC = () => {
                 <Button
                   variant="contained"
                   color="success"
-                  onClick={() => handleAcceptDelivery(delivery.id)}
+                  onClick={() => handleAcceptDelivery(delivery.id ?? '')}
                   style={{ marginRight: '1rem' }}
                 >
                   Aceitar
@@ -170,14 +183,14 @@ const AdminPage: React.FC = () => {
                 <Button
                   variant="contained"
                   color="error"
-                  onClick={() => handleRejectDelivery(delivery.id)}
+                  onClick={() => handleRejectDelivery(delivery.id ?? '')}
                 >
                   Recusar
                 </Button>
               </>
             )}
 
-            {assignedDeliveries[delivery.id] ? (
+            {assignedDeliveries[delivery.id ?? ''] ? (
               <Typography
                 variant="body1"
                 color="secondary"
@@ -189,7 +202,7 @@ const AdminPage: React.FC = () => {
                 }}
               >
                 <AssignmentIndIcon color="secondary" />
-                Motoboy <strong>{assignedDeliveries[delivery.id]}</strong> já foi designado para a entrega <strong>{delivery.id}.</strong>Seja paciente!
+                Motoboy <strong>{assignedDeliveries[delivery.id ?? '']}</strong> já foi designado para a entrega <strong>{delivery.id ?? ''}.</strong> Seja paciente!
               </Typography>
             ) : (
               isAccepted && (
@@ -197,11 +210,11 @@ const AdminPage: React.FC = () => {
                   <FormControl fullWidth margin="normal">
                     <InputLabel>Selecione o Motoboy</InputLabel>
                     <Select
-                      value={selectedMotoboyMap[delivery.id] || ''}
+                      value={selectedMotoboyMap[delivery.id ?? ''] || ''}
                       onChange={(e) =>
                         setSelectedMotoboyMap((prev) => ({
                           ...prev,
-                          [delivery.id]: e.target.value,
+                          [delivery.id ?? '']: e.target.value,
                         }))
                       }
                     >
@@ -216,9 +229,9 @@ const AdminPage: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={() =>
-                      handleAssignMotoboy(delivery.id, selectedMotoboyMap[delivery.id])
+                      handleAssignMotoboy(delivery.id ?? '', selectedMotoboyMap[delivery.id ?? ''])
                     }
-                    disabled={!selectedMotoboyMap[delivery.id]}
+                    disabled={!selectedMotoboyMap[delivery.id ?? '']}
                     style={{ marginTop: '0.5rem' }}
                   >
                     Atribuir Motoboy
