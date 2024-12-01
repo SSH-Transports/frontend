@@ -1,22 +1,28 @@
 import React, {
   FC,
   useState,
-  useEffect,
   useContext,
   createContext,
   SetStateAction,
   PropsWithChildren,
   useMemo,
+  useCallback,
 } from 'react'
 
 import { jwtDecode } from 'jwt-decode'
 import getUser from '../services/getUser'
 import { User } from '../types/User'
+import postLogin from '../services/postLogin'
+import { toast } from 'react-toastify'
+import { LoginFormData } from '../pages/LoginPage'
+
+export type LoginData = LoginFormData & { isFromMobile: boolean }
 
 interface UserContextData {
   user?: User
   setUser: React.Dispatch<SetStateAction<User | undefined>>
   logout: () => void
+  login: (data: LoginData) => void
 }
 
 interface PropsWithReactNode {
@@ -32,60 +38,45 @@ export const useUserContext = () => {
 export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
   children,
 }) => {
-  const [token, setToken] = useState<string>()
-  const tokenStorage = localStorage.getItem('token')
-  const [user, setUser] = useState<User>()
-  const userStorage = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null
+  const userStorage = localStorage.getItem('user')
+    ? JSON.parse(localStorage.getItem('user')!)
+    : undefined
+  const [user, setUser] = useState<User | undefined>(userStorage)
 
-  useEffect(() => {
-    if (tokenStorage && !token) {
-      setToken(tokenStorage)
+  const fetchUser = useCallback(async () => {
+    const decoded = jwtDecode(localStorage.getItem('token') as string)
+    if (typeof decoded.sub === 'string') {
+      const user = await getUser(decoded.sub)
+      localStorage.setItem('user', JSON.stringify(user))
+      setUser(user)
+      toast.success('Login feito com sucesso')
     }
-  }, [tokenStorage])
+  }, [localStorage.getItem('token')])
 
-  const fetchUser = async () => {
-    if (tokenStorage) {
-      const decoded = jwtDecode(tokenStorage as string)
-      if (decoded && decoded.exp && decoded.exp < Date.now() / 1000) {
-        logout()
-      } else {
-        if (typeof decoded.sub === 'string') {
-          await getUser(decoded.sub)
-          .then(response => {
-              setUser(response)
-            })
-            .catch(error => {
-              console.error(error)
-            })
-        }
-      }
+  const login = async (data: LoginData) => {
+    const login = await postLogin(data)
+    if (login.access_token) {
+      localStorage.setItem('token', login.access_token)
+      await fetchUser()
+    } else {
+      toast.error('Erro ao fazer login')
     }
   }
 
   const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    setUser(undefined); 
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+    setUser(undefined)
   }
-
-  useEffect(() => {
-    fetchUser()
-  }, [token, user])
-
-  useEffect(() => {
-    if (userStorage && !user) {
-      setUser(userStorage)
-    }
-  }, [userStorage, user])
 
   const values = useMemo(() => {
     return {
-      tokenStorage,
       user,
       setUser,
-      logout
+      login,
+      logout,
     }
-  }, [tokenStorage, user, userStorage, logout])
+  }, [user, userStorage, login, logout])
 
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>
 }
