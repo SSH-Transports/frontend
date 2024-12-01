@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<string[]>([]);
-  const { user, setUser } = useUserContext();
+  const { user, logout} = useUserContext();
   
   // Busca notificações do backend (Fetch)
   useEffect(() => {
@@ -254,9 +254,7 @@ const Navbar: React.FC = () => {
                 to="/login"
                 onClick={() => {
                   toggleDrawer(false);
-                  localStorage.setItem(`user`, ``);
-                  localStorage.setItem(`token`, ``);
-                  setUser(undefined);  // Clear user context
+                  logout();
                 }}
               >
                 <ListItemIcon>

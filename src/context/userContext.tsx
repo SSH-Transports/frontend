@@ -16,6 +16,7 @@ import { User } from '../types/User'
 interface UserContextData {
   user?: User
   setUser: React.Dispatch<SetStateAction<User | undefined>>
+  logout: () => void
 }
 
 interface PropsWithReactNode {
@@ -37,7 +38,7 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
   const userStorage = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null
 
   useEffect(() => {
-    if(tokenStorage && !token){
+    if (tokenStorage && !token) {
       setToken(tokenStorage)
     }
   }, [tokenStorage])
@@ -45,25 +46,31 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
   const fetchUser = async () => {
     if (tokenStorage) {
       const decoded = jwtDecode(tokenStorage as string)
-      /* if (decoded && decoded.exp && decoded.exp < Date.now() / 1000) {
-        localStorage.removeItem('token')
-      } */ /* else { */
+      if (decoded && decoded.exp && decoded.exp < Date.now() / 1000) {
+        logout()
+      } else {
         if (typeof decoded.sub === 'string') {
           await getUser(decoded.sub)
-            .then(response => {
+          .then(response => {
               setUser(response)
             })
             .catch(error => {
               console.error(error)
             })
-        /* } */
+        }
       }
     }
   }
 
+  const logout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(undefined); 
+  }
+
   useEffect(() => {
     fetchUser()
-  }, [token])
+  }, [token, user])
 
   useEffect(() => {
     if (userStorage && !user) {
@@ -76,8 +83,9 @@ export const UserProvider: FC<PropsWithChildren<PropsWithReactNode>> = ({
       tokenStorage,
       user,
       setUser,
+      logout
     }
-  }, [tokenStorage, user, userStorage])
+  }, [tokenStorage, user, userStorage, logout])
 
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>
 }

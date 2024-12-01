@@ -4,6 +4,7 @@ import { ThemeProvider } from '@mui/material';
 import { UserProvider } from './context/userContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import {
   MotoboyPageOrder,
   Dashboard,
@@ -30,11 +31,47 @@ const App: React.FC = () => {
                 <Route path="/" element={<LoginPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/delivery-form" element={<DeliveryForm />} />
-                <Route path="/motoboy/:motoboyId" element={<MotoboyPage />} />
-                <Route path="/order/:id" element={<MotoboyPageOrder />} />
-                <Route path="/admin" element={<AdminPage />} />
+
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/delivery-form"
+                  element={
+                    <ProtectedRoute>
+                      <DeliveryForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/motoboy/:motoboyId"
+                  element={
+                    <ProtectedRoute>
+                      <MotoboyPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/order/:id"
+                  element={
+                    <ProtectedRoute>
+                      <MotoboyPageOrder />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </div>
             <Footer />
@@ -43,6 +80,6 @@ const App: React.FC = () => {
       </UserProvider>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
