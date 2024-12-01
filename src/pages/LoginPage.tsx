@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,8 +16,7 @@ import { styled } from '@mui/system'
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useState } from 'react'
-import postLogin from '../services/postLogin'
-import { toast } from 'react-toastify';
+import { useUserContext } from '../context/userContext';
 
 const ContainerStyled = styled(Container)({
   display: 'flex',
@@ -58,15 +57,16 @@ const schema = z.object({
   password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
 })
 
-type FormData = z.infer<typeof schema>
+export type LoginFormData = z.infer<typeof schema>
 
 const LoginPage: React.FC = () => {
+  const { login, user } = useUserContext()
   const [searchParams] = useSearchParams()
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(schema),
   })
 
@@ -76,19 +76,22 @@ const LoginPage: React.FC = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>,
   ) => event.preventDefault()
-  
-  const navigate = useNavigate()
 
-  const onSubmit = async (data: FormData) => {    
-    const login = await postLogin({ ...data, isFromMobile: !!searchParams.get('isFromMobile') })
-    if (login.access_token) {
-      navigate("/dashboard")
-      localStorage.setItem('token', login.access_token)
-      toast.success('Login feito com sucesso')
-    } else {
-      toast.error('Erro ao fazer login')
-    }
+  const navigate = useNavigate()
+  
+  const onSubmit = async (data: LoginFormData) => {
+    login({
+      ...data,
+      isFromMobile: !!searchParams.get('isFromMobile'),
+    })
+    setTimeout(() => navigate("/dashboard"), 3000)
   }
+
+  useEffect(() =>{
+    if (user) {
+      navigate("/dashboard")
+    }
+  }, [])
 
   return (
     <ContainerStyled>
