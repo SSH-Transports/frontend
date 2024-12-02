@@ -26,8 +26,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { io } from 'socket.io-client';
+import { Link, useNavigate } from 'react-router-dom';
 import { useUserContext } from '../context/userContext';
 import api from '../services/api';
 import { Notification, NotificationStatus } from '../types/Notification';
@@ -37,9 +36,7 @@ const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { user, logout } = useUserContext();
-
-  const socket = io('http://localhost:8080');
+  const { user, socket, logout } = useUserContext();
 
   const fetchNotifications = async () => {
     if (!user?.id) return;
@@ -108,6 +105,11 @@ const Navbar: React.FC = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const navigate = useNavigate()
+  const handleClickItem = (link: string) => {
+    navigate(link)
+  }
+
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -149,7 +151,13 @@ const Navbar: React.FC = () => {
           >
             {notifications.length > 0 ? (
               notifications.map((notification, index) => (
-                <MenuItem key={index} onClick={handleMenuClose}>
+                <MenuItem
+                  key={index}
+                  onClick={() =>{
+                    handleClickItem(notification.link ?? '')
+                    handleMenuClose()
+                  }}
+                >
                   <ListItemIcon>
                     <MailIcon color="primary" />
                   </ListItemIcon>

@@ -13,6 +13,7 @@ export enum NotificationType {
 export interface Notification {
   id?: string;
   title: string;
+  link?: string;
   message: string;
   status: NotificationStatus;
   type: NotificationType;

@@ -26,7 +26,6 @@ interface Order {
 export default function getOrders(): Promise<Order[]> {
   return api.get('orders').then(
     response => {
-      console.log(response.data)
       return response.data
     },
     error => {

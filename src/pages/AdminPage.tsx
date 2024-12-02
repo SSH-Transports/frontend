@@ -1,26 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Container,
-  Typography,
-  Button,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Box,
-  Alert,
-  Stack,
-} from '@mui/material';
 import { keyframes } from '@emotion/react';
-import { deliveries_mock } from '../data/deliveries';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/HourglassEmpty';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import CancelIcon from '@mui/icons-material/Cancel';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
+
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Typography
+} from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Order, OrderStatus } from '../types/Order';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUserContext } from '../context/userContext';
+import { changeStatus } from '../helpers/changeStatus';
 import getOrders from '../services/getOrders';
+import getUsers from '../services/getUsers';
+import updateOrder from '../services/updateOrder';
+import { Order, OrderStatus } from '../types/Order';
+import { User, UserRoles } from '../types/User';
 
 const fadeInSlideDown = keyframes`
   0% {
@@ -34,56 +39,97 @@ const fadeInSlideDown = keyframes`
 `;
 
 const AdminPage: React.FC = () => {
-  const motoboys = Array.from(new Set(deliveries_mock.map((delivery) => delivery.motoboy)));
-  const [selectedMotoboyMap, setSelectedMotoboyMap] = useState<{ [key: string]: string }>({});
-  const [assignedDeliveries, setAssignedDeliveries] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
+  const [couriers, setCouriers] = useState<User[]>([]);
+  const [selectedCourier, setSelectedCourier] = useState<User>();
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [deliveries, setDeliveries] = useState<Order[]>([]);
-  
-  const mobile = useMediaQuery('(max-width:767px)');
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const handleAcceptDelivery = (deliveryId: string) => {
-    setDeliveries((prev) =>
-      prev.map((delivery) =>
-        delivery.id === deliveryId
-          ? { ...delivery, status: OrderStatus.DELIVERED } 
-          : delivery
-      )
-    );
+  const mobile = useMediaQuery('(max-width:767px)');
+  const { user, socket } = useUserContext();
+
+  socket.on('newOrder', () => {
+    getOrders().then(setOrders);
+  });
+
+  socket.on('message', () => {
+    getOrders().then(setOrders);
+  })
+
+  const handleAcceptDelivery = (orderId: string) => {
+    changeStatus({
+      socket,
+      user,
+      orderId,
+      orderStatus: OrderStatus.SEPARATING,
+    });
+    setAlert({
+      type: 'success',
+      message: `Entrega ${orderId} aceita.`,
+    });
+
+    setOrders((prevOrders) => {
+      return prevOrders.map((order) => {
+        if (order.id === orderId) {
+          return { ...order, status: OrderStatus.SEPARATING };
+        }
+        return order;
+      })
+    });
   };
-  
-  const handleRejectDelivery = (deliveryId: string) => {
-    setDeliveries((prev) =>
-      prev.map((delivery) =>
-        delivery.id === deliveryId
-          ? { ...delivery, status: OrderStatus.REFUSED } 
-          : delivery
-      )
-    );
+
+  const handleRejectDelivery = (orderId: string) => {
+    changeStatus({
+      socket,
+      user,
+      orderId,
+      orderStatus: OrderStatus.REFUSED,
+    });
+    setAlert({
+      type: 'error',
+      message: `Entrega ${orderId} recusada.`,
+    });
+    setOrders((prevOrders) => {
+      return prevOrders.map((order) => {
+        if (order.id === orderId) {
+          return { ...order, status: OrderStatus.REFUSED };
+        }
+        return order;
+      })
+    })
+  };
+
+  const handleAssignMotoboy = (orderId: string) => {
+    updateOrder({
+      id: orderId,
+      body: {
+        courierId: selectedCourier?.id,
+      }
+    });
+    changeStatus({
+      socket,
+      user,
+      orderId,
+      orderStatus: OrderStatus.ON_THE_WAY,
+    });
+    setAlert({
+      type: 'success',
+      message: `Motoboy ${selectedCourier?.name} atribuído à entrega ${orderId}.`,
+    });
+    setOrders((prevOrders) => {
+      return prevOrders.map((order) => {
+        if (order.id === orderId) {
+          return { ...order, status: OrderStatus.ON_THE_WAY, courierId: selectedCourier?.id };
+        }
+        return order;
+      })
+    });
   };
 
   useEffect(() => {
-    getOrders().then((data) => {
-      console.log('Orders:', data); 
-      if (Array.isArray(data)) {
-        setDeliveries(data);
-      } else {
-        console.error('Data is not an array:', data);
-      }
-    });
+    getOrders().then(setOrders);
+    getUsers(UserRoles.COURIER).then(setCouriers);
   }, []);
-
-  const handleAssignMotoboy = (deliveryId: string, motoboyName: string) => {
-    setAssignedDeliveries((prev) => ({
-      ...prev,
-      [deliveryId]: motoboyName,
-    }));
-    setAlert({
-      type: 'success',
-      message: `Motoboy ${motoboyName} atribuído à entrega ${deliveryId}.`,
-    });
-    setTimeout(() => setAlert(null), 3000);
-  };
 
   return (
     <Container>
@@ -139,14 +185,18 @@ const AdminPage: React.FC = () => {
         </Typography>
       </Box>
 
-      {Array.isArray(deliveries) && deliveries.map((delivery) => {
+      {Array.isArray(orders) && orders.map((delivery) => {
         const isRefused = delivery.status === OrderStatus.REFUSED;
         const isPending = delivery.status === OrderStatus.WAITING_RESPONSE;
-        const isAccepted = delivery.status === OrderStatus.DELIVERED;
+        const isSeparating = delivery.status === OrderStatus.SEPARATING;
+        const isOnTheWay = delivery.status === OrderStatus.ON_THE_WAY;
+        const isDelivered = delivery.status === OrderStatus.DELIVERED;
+
+        const id = delivery.id ?? '';
 
         return (
           <Box
-            key={delivery.id}
+            key={id}
             border="1px solid #e0e0e0"
             borderRadius="8px"
             padding="1rem"
@@ -154,20 +204,48 @@ const AdminPage: React.FC = () => {
             boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
             bgcolor={isRefused ? '#FFEBEE' : 'white'}
             borderColor={isRefused ? '#F44336' : '#e0e0e0'}
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              navigate(`/order/${id}`);
+            }}
           >
-            <Typography variant="h6" gutterBottom>
-              Entrega ID: {delivery.id} - {delivery.status === OrderStatus.WAITING_RESPONSE ? (
-                <PendingIcon color="warning" />
-              ) : delivery.status === OrderStatus.DELIVERED ? (
-                <DoneIcon color="success" />
-              ) : delivery.status === OrderStatus.REFUSED ? (
-                <CancelIcon color="error" />
-              ) : (
-                <DoneIcon color="success" />
-              )}
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                Entrega ID: {id}
+              </Typography>
+              {
+                {
+                  [OrderStatus.WAITING_RESPONSE]: <PendingIcon color="warning" />,
+                  [OrderStatus.SEPARATING]: <DoneIcon color="success" />,
+                  [OrderStatus.REFUSED]: <CancelIcon color="error" />,
+                  [OrderStatus.ON_THE_WAY]: <TwoWheelerIcon color="warning" />,
+                  [OrderStatus.DELIVERED]: <DoneIcon color="success" />,
+                }[delivery.status ?? '']
+              }
+            </div>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              Data: {
+                delivery?.createdAt
+                  ? new Date(delivery.createdAt).toLocaleDateString("pt-BR")
+                  : 'Data inválida'
+              }
             </Typography>
             <Typography variant="body2" color="textSecondary" gutterBottom>
-              Data: {delivery.createdAt} - Distância: {delivery.distance} km - R${delivery.cost}
+              Distância: {delivery.distance} km
+            </Typography>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              Peso: {delivery.weight} kg
+            </Typography>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              Preço: R${delivery.cost}
             </Typography>
 
             {isPending && (
@@ -175,7 +253,7 @@ const AdminPage: React.FC = () => {
                 <Button
                   variant="contained"
                   color="success"
-                  onClick={() => handleAcceptDelivery(delivery.id ?? '')}
+                  onClick={() => handleAcceptDelivery(id)}
                   style={{ marginRight: '1rem' }}
                 >
                   Aceitar
@@ -183,61 +261,49 @@ const AdminPage: React.FC = () => {
                 <Button
                   variant="contained"
                   color="error"
-                  onClick={() => handleRejectDelivery(delivery.id ?? '')}
+                  onClick={() => handleRejectDelivery(id)}
                 >
                   Recusar
                 </Button>
               </>
             )}
 
-            {assignedDeliveries[delivery.id ?? ''] ? (
-              <Typography
-                variant="body1"
-                color="secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginTop: '0.5rem',
-                }}
-              >
-                <AssignmentIndIcon color="secondary" />
-                Motoboy <strong>{assignedDeliveries[delivery.id ?? '']}</strong> já foi designado para a entrega <strong>{delivery.id ?? ''}.</strong> Seja paciente!
-              </Typography>
-            ) : (
-              isAccepted && (
+            {
+              isSeparating && (
                 <>
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel>Selecione o Motoboy</InputLabel>
-                    <Select
-                      value={selectedMotoboyMap[delivery.id ?? ''] || ''}
-                      onChange={(e) =>
-                        setSelectedMotoboyMap((prev) => ({
-                          ...prev,
-                          [delivery.id ?? '']: e.target.value,
-                        }))
-                      }
-                    >
-                      {motoboys.map((motoboy) => (
-                        <MenuItem key={motoboy} value={motoboy}>
-                          {motoboy}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <InputLabel>Selecione o Motoboy</InputLabel>
+                  <Select
+                    style={{ width: '100%' }}
+                    value={selectedCourier?.id ?? ""}
+                    onChange={(e) =>
+                      setSelectedCourier(couriers.find((courier) => {
+                        return courier.id === e.target.value
+                      }))
+                    }
+                  >
+                    {couriers.map((courier) => (
+                      <MenuItem key={courier.id} value={courier.id}>
+                        {courier.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() =>
-                      handleAssignMotoboy(delivery.id ?? '', selectedMotoboyMap[delivery.id ?? ''])
-                    }
-                    disabled={!selectedMotoboyMap[delivery.id ?? '']}
+                    onClick={() => handleAssignMotoboy(id)}
+                    disabled={!selectedCourier}
                     style={{ marginTop: '0.5rem' }}
                   >
                     Atribuir Motoboy
                   </Button>
                 </>
               )
+            }
+
+            {isOnTheWay && (
+              <Typography variant="body2" color="textSecondary">
+                Motoboy: {couriers.find(({ id }) => id === delivery.courierId)?.name}
+              </Typography>
             )}
           </Box>
         );
