@@ -205,9 +205,6 @@ const AdminPage: React.FC = () => {
             bgcolor={isRefused ? '#FFEBEE' : 'white'}
             borderColor={isRefused ? '#F44336' : '#e0e0e0'}
             style={{ cursor: 'pointer' }}
-            onClick={() => {
-              navigate(`/order/${id}`);
-            }}
           >
 
             <div
@@ -216,6 +213,9 @@ const AdminPage: React.FC = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: '1rem',
+              }}
+              onClick={() => {
+                navigate(`/order/${id}`);
               }}
             >
               <Typography variant="h6" gutterBottom>
